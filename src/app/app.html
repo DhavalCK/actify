@@ -1,27 +1,104 @@
-<div class="min-h-screen flex flex-col">
-    <header class="bg-white border-b">
-        <div class="max-w-3xl mx-auto p-4 flex items-center justify-between">
-            <h1 class="text-xl font-semibold">
-                Actify
-            </h1>
-            <nav>
-                <a class="text-sm px-3 py-1 rounded hover:bg-gray-100">Today</a>
-                <a class="text-sm px-3 py-1 rounded hover:bg-gray-100">Settings</a>
-            </nav>
-        </div>
-    </header>
+<div class="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-start py-12">
+    <div class="w-full max-w-xl mx-auto px-4">
+        <header class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold leading-tight text-slate-950">Actify</h1>
+                <p class="text-sm text-slate-600 mt-1">Small daily wins, big momentum.</p>
+            </div>
+            <div class="text-sm text-slate-600">Today</div>
+        </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-3xl mx-auto p-6">
-        <section class="bg-white rounded-lg p-6 shadow-sm">
-            <h2 class="text-lg font-semibold">Today</h2>
-            <p class="text-sm text-gray-600">Your actions will appear here.</p>
-            <div class="mt-4">
-                <button class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Add action</button>
+        <section class="bg-white rounded-2xl shadow-xl p-5 -mt-2">
+            <!-- progress + quick metrics -->
+            <div class="flex items-center gap-4 mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-xs text-slate-500">Daily completion</div>
+                            <div class="text-lg font-semibold text-slate-800">42%</div>
+                        </div>
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg ring-4 ring-blue-50">
+                            <div class="text-white text-center leading-tight">
+                                <div class="text-[10px] font-medium opacity-90">STREAK</div>
+                                <div class="font-bold text-xl">3</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-2 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-400 to-emerald-400" style="width:42%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- add input -->
+            <form (submit)="add()" class="flex gap-3 items-center mb-5">
+                <input [formControl]="actionTitle" placeholder="Add quick action (e.g., Walk 20 mins)"
+                    class="flex-1 p-3 rounded-xl border border-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm" />
+                <button type="submit"
+                    class="w-14 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-200 hover:scale-105 transition active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </form>
+
+            <!-- actions list -->
+            <div class="space-y-3">
+
+                <ng-container *ngIf="actions.length; else empty">
+                    <div *ngFor="let a of actions" (click)="toggle(a.id)"
+                        class="group bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
+                            [ngClass]="{'border-blue-500 bg-blue-500': a.done, 'border-slate-300': !a.done}">
+                            <svg *ngIf="a.done" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <div class="truncate">
+                                    <div [class.line-through]="a.done" [class.text-slate-400]="a.done"
+                                        class="text-base font-medium text-slate-800 truncate transition-colors">{{
+                                        a.title }}</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">{{ a.createdAt | date:'shortTime' }}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3 ">
+                                    <button (click)="$event.stopPropagation(); remove(a.id)"
+                                        class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                        title="Remove">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <ng-template #empty>
+                    <div class="text-center py-8 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-3 w-10 h-10 text-slate-300"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3" />
+                        </svg>
+                        <div class="font-medium">No actions yet</div>
+                        <div class="text-sm mt-1">Add a quick action to get started — small wins count.</div>
+                    </div>
+                </ng-template>
             </div>
         </section>
-    </main>
-    <footer class="border-t bg-white">
-        <div class="max-w-3xl mx-auto p-4 text-sm text-gray-500">Actify - minimal daily actions</div>
-    </footer>
+
+        <footer class="mt-6 text-center text-xs text-slate-500">Tip: mark at least one action to keep your streak alive.
+        </footer>
+    </div>
 </div>
