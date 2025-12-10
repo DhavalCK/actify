@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
 import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
 import { environment } from '../environments/environment';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     // initialize Firebase App
     provideFirebaseApp(() => initializeApp(environment.firebase)),
+
+    // initialize FireAuth
+    provideAuth(() => getAuth()),
 
     // initialize Firestore using the new localCache API
     provideFirestore(() => {

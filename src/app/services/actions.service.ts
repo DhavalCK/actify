@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Action } from '../models/action.model';
 import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc } from '@angular/fire/firestore';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,33 @@ export class ActionsService {
 
   actions = signal<Action[]>([]);
   private db: Firestore;
+  private auth: AuthService
 
   constructor() {
     this.db = inject(Firestore); // inside constructor is safer
+    this.auth = inject(AuthService); // inside constructor is safer
+
+
+    this.auth.uid$.subscribe((uid) => {
+      if (!uid) this.actions.set([]);
+
+      // Get and Set Actions
+      this.getAndSetActions()
+    })
+  }
+
+  get userId() {
+    return this.auth.uid$.value;
+  }
+
+  get authCollectionPath() {
+    return `users/${this.userId}/${this.collectionPath}`;
+  }
+
+  getAndSetActions() {
+    if (!this.userId) return;
     // Created pointer to actions collection
-    const colRef = collection(this.db, this.collectionPath);
+    const colRef = collection(this.db, this.authCollectionPath);
     const q = query(colRef, orderBy('createdAt', 'desc'));
 
     collectionData(q, { idField: 'id' }).subscribe((docs: any[]) => {
@@ -32,7 +55,9 @@ export class ActionsService {
 
   // Add action 
   async add(title: string) {
-    const colRef = collection(this.db, this.collectionPath);
+    if (!this.userId) return;
+
+    const colRef = collection(this.db, this.authCollectionPath);
     const docRef = await addDoc(colRef, {
       title: title.trim(),
       done: false,
@@ -43,14 +68,18 @@ export class ActionsService {
 
   // Remove Action
   async remove(id: string) {
-    const docRef = doc(this.db, this.collectionPath, id);
+    if (!this.userId) return;
+
+    const docRef = doc(this.db, this.authCollectionPath, id);
     await deleteDoc(docRef);
     return;
   }
 
   // Toggle Action
   async toggleDone(action: Action) {
-    const docRef = doc(this.db, this.collectionPath, action.id);
+    if (!this.userId) return;
+
+    const docRef = doc(this.db, this.authCollectionPath, action.id);
     await updateDoc(docRef, {
       done: !action.done
     });
