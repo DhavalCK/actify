@@ -1,12 +1,12 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActionsService } from './services/actions.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Action } from './models/action.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -15,13 +15,14 @@ export class App {
   protected readonly title = signal('actify');
   actionTitle = new FormControl('');
 
-  private actionService = inject(ActionsService);
+  actionService = inject(ActionsService);
   actions: Action[] = [];
 
   constructor() {
-    effect(() => {
-      this.actions = this.actionService.actions();
-    });
+  }
+
+  get actionsSignal() {
+    return this.actionService.actions();
   }
 
   add() {
@@ -35,7 +36,7 @@ export class App {
     this.actionService.remove(id);
   }
 
-  toggle(id: string) {
-    this.actionService.toggleDone(id);
+  toggle(action: Action) {
+    this.actionService.toggleDone(action);
   }
 }

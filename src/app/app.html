@@ -47,8 +47,8 @@
             <!-- actions list -->
             <div class="space-y-3">
 
-                <ng-container *ngIf="actions.length; else empty">
-                    <div *ngFor="let a of actions" (click)="toggle(a.id)"
+                <ng-container *ngIf="actionsSignal.length; else empty">
+                    <div *ngFor="let a of actionsSignal" (click)="toggle(a)"
                         class="group bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition cursor-pointer">
                         <div class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
                             [ngClass]="{'border-blue-500 bg-blue-500': a.done, 'border-slate-300': !a.done}">
