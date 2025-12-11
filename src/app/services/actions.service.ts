@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { Action } from '../models/action.model';
 import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
+import { PerformanceService } from './performance.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,11 +15,11 @@ export class ActionsService {
   actions = signal<Action[]>([]);
   private db: Firestore;
   private auth: AuthService
-
+  private performance: PerformanceService
   constructor() {
     this.db = inject(Firestore); // inside constructor is safer
     this.auth = inject(AuthService); // inside constructor is safer
-
+    this.performance = inject(PerformanceService);
 
     this.auth.uid$.subscribe((uid) => {
       if (!uid) this.actions.set([]);
@@ -53,6 +54,24 @@ export class ActionsService {
     })
   }
 
+  get todayTasks(): Action[] {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+    const end = start + 24 * 60 * 60 * 1000 - 1;
+    return this.actions().filter(a => (a.createdAt ?? 0) >= start && (a.createdAt ?? 0) <= end);
+  }
+
+  async calculatePerformance() {
+    const total = this.todayTasks.length;
+    const completed = this.todayTasks.reduce((acc, action) => acc + (action.done ? 1 : 0), 0);
+
+    try {
+      await this.performance.saveToday(completed, total);
+    } catch (err) {
+      console.error('calculatePerformance: save failed', err);
+    }
+  }
+
   // Add action 
   async add(title: string) {
     if (!this.userId) return;
@@ -63,6 +82,7 @@ export class ActionsService {
       done: false,
       createdAt: Date.now()
     });
+    await this.calculatePerformance();
     return docRef.id;
   }
 
@@ -72,6 +92,7 @@ export class ActionsService {
 
     const docRef = doc(this.db, this.authCollectionPath, id);
     await deleteDoc(docRef);
+    await this.calculatePerformance();
     return;
   }
 
@@ -83,6 +104,7 @@ export class ActionsService {
     await updateDoc(docRef, {
       done: !action.done
     });
+    await this.calculatePerformance();
     return;
   }
 }
