@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+		// Per-user data (actions, performance, etc.)
+        // Path: /users/{userId}/...
+		match /users/{userId}/{document=**} {
+            // Allow read & write only when the request is authenticated
+            // and the signed-in UID matches the userId in the path.
+	        allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+    
+        // Optional: allow read to public documents (e.g., app config)
+		match /public/{docId} {
+			allow read: if true;
+            // No writes from clients — keep writes via admin/Cloud Functions
+		    allow write: if false;
+  	    }
+    
+        // Deny everything else explicitly (default)
+        match /{document=**} {
+        allow read, write: if false;
+        }
+    }
+}
