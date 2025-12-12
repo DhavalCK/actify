@@ -3,6 +3,7 @@ import { Action } from '../models/action.model';
 import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
+import { StreakService } from './streak.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +15,15 @@ export class ActionsService {
 
   actions = signal<Action[]>([]);
   private db: Firestore;
-  private auth: AuthService
-  private performance: PerformanceService
+  private auth: AuthService;
+  private performance: PerformanceService;
+  private streakServ: StreakService;
+
   constructor() {
     this.db = inject(Firestore); // inside constructor is safer
     this.auth = inject(AuthService); // inside constructor is safer
     this.performance = inject(PerformanceService);
+    this.streakServ = inject(StreakService);
 
     this.auth.uid$.subscribe((uid) => {
       if (!uid) this.actions.set([]);
@@ -30,7 +34,7 @@ export class ActionsService {
   }
 
   get userId() {
-    return this.auth.uid$.value;
+    return this.auth.currentUid;
   }
 
   get authCollectionPath() {
@@ -67,6 +71,7 @@ export class ActionsService {
 
     try {
       await this.performance.saveToday(completed, total);
+      await this.streakServ.updateStreak(completed > 0);
     } catch (err) {
       console.error('calculatePerformance: save failed', err);
     }

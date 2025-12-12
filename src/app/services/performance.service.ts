@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { AuthService } from "./auth.service";
-import { doc, getFirestore, setDoc } from "@angular/fire/firestore";
+import { doc, DocumentSnapshot, getDoc, getFirestore, setDoc } from "@angular/fire/firestore";
 
 @Injectable({
     providedIn: 'root'
@@ -39,6 +39,25 @@ export class PerformanceService {
         }
     }
 
+    // Returns DocumentSnapshot | null
+    async getPerfomanceDoc(dateKey: string): Promise<DocumentSnapshot | null> {
+        const uid = this.currentUid();
+
+        if (!uid) {
+            console.warn('PerformanceService.getPerfomanceDoc: no uid yet');
+            return null;
+        }
+
+        try {
+            const docRef = doc(this.db, 'users', uid, 'performance', dateKey);
+            const snap = await getDoc(docRef);
+            return snap;
+        } catch (err) {
+            console.error('Get Performance Error: ', err);
+            return null;
+        }
+    }
+
     private currentUid() {
         // auth exposes uid$ BehaviorSubject per earlier steps
         return (this.auth?.uid$?.value) ?? null;
@@ -48,4 +67,15 @@ export class PerformanceService {
     private todayKey(): string {
         return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     }
+
+    private yesterdayKey(): string {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    }
+
+    // Expose keys to use elsewhere
+    public getTodayKey() { return this.todayKey(); }
+    public getYesterdayKey() { return this.yesterdayKey(); }
+
 }

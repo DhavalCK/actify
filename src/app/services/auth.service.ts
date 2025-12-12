@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { BehaviorSubject } from "rxjs";
 
@@ -10,7 +9,6 @@ export class AuthService {
 
     // holds current uid (null until signed)
     uid$ = new BehaviorSubject<string | null>(null);
-    uid = toSignal(this.uid$, { initialValue: null });
 
     constructor() {
         const auth = getAuth();
@@ -26,5 +24,9 @@ export class AuthService {
                 });
             }
         })
+    }
+
+    get currentUid(): string | null {
+        return this.uid$?.value ?? null;
     }
 }
