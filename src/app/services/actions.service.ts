@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Action } from '../models/action.model';
-import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
 import { StreakService } from './streak.service';
@@ -58,20 +58,46 @@ export class ActionsService {
     })
   }
 
-  get todayTasks(): Action[] {
+  // get todayTasks(): Action[] {
+  //   const now = new Date();
+  //   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+  //   const end = start + 24 * 60 * 60 * 1000 - 1;
+  //   return this.actions().filter(a => (a.createdAt ?? 0) >= start && (a.createdAt ?? 0) <= end);
+  // }
+
+  async computeTodayCountsFromFirestore() {
+    if (!this.userId) return { completed: 0, total: 0 };
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
     const end = start + 24 * 60 * 60 * 1000 - 1;
-    return this.actions().filter(a => (a.createdAt ?? 0) >= start && (a.createdAt ?? 0) <= end);
+
+    const colRef = collection(this.db, this.authCollectionPath);
+    // query documents with createdAt in today's range
+    const q = query(colRef, where('createdAt', '>=', start), where('createdAt', '<=', end));
+    try {
+      const snap = await getDocs(q);
+      let total = 0;
+      let completed = 0;
+
+      snap.forEach(d => {
+        total++;
+        const data: any = d.data();
+        if (data.done) completed++;
+      });
+      return { completed, total };
+    } catch (err) {
+      console.error('computeTodayCountsFromFirestore failed', err);
+      return { completed: 0, total: 0 };
+    }
   }
 
   async calculatePerformance() {
-    const total = this.todayTasks.length;
-    const completed = this.todayTasks.reduce((acc, action) => acc + (action.done ? 1 : 0), 0);
+    const { completed, total } = await this.computeTodayCountsFromFirestore();
+
 
     try {
       await this.performance.saveToday(completed, total);
-      await this.streakServ.updateStreak(completed > 0);
+      await this.streakServ.updateStreak(true);
     } catch (err) {
       console.error('calculatePerformance: save failed', err);
     }
