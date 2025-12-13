@@ -85,7 +85,7 @@ export class ActionsService {
 
     try {
       await this.performance.saveToday(completed, total);
-      await this.streakServ.updateStreak(true);
+      await this.streakServ.updateStreak(completed > 0);
     } catch (err) {
       console.error('calculatePerformance: save failed', err);
     }

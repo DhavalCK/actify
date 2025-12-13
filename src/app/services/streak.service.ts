@@ -47,18 +47,21 @@ export class StreakService {
         const docRef = doc(this.db, 'users', uid, 'streak', 'info');
 
         // Read yesterday Status 
-        const yesterdayCompleted = (await this.getYesterdayStatus()) || 0;
+        const yesterdayCompleted = (await this.getYesterdayStatus()) > 0;
 
         // read existing streak doc
         let current = 0;
         let best = 0;
+        let previousStreak = 0;
         let lastUpdatedTs = 0;
+
         try {
             const sSnap = await getDoc(docRef);
             if (sSnap && sSnap.exists()) {
                 const d = sSnap.data() as any;
                 current = d.current ?? 0;
                 best = d.best ?? 0;
+                previousStreak = d.previousStreak ?? 0;
                 lastUpdatedTs = d.updatedAt ?? 0;
             }
         } catch (err) {
@@ -67,38 +70,39 @@ export class StreakService {
 
         // helper: same-day check
         const todayKey = this.performance.getTodayKey();
-        const lastUpdatedKey = lastUpdatedTs ? new Date(lastUpdatedTs).toISOString().slice(0, 10) : null;
-        const alreadyUpdatedToday = lastUpdatedKey === todayKey;
+        const d = new Date(lastUpdatedTs || 0);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const lastUpdatedDateKey = lastUpdatedTs ? `${year}-${month}-${day}` : null;
+
+        const alreadyUpdatedToday = lastUpdatedDateKey === todayKey;
 
         // Streak Logic
-        if (alreadyUpdatedToday) {
-            // idempotent: don't increment again today
-            if (todayCompleted) {
-                // keep current as-is (no increment). If stored current is 0 but todayCompleted true,
-                // that's an edge case — treat as current = 1
-                if (current <= 0) current = 1;
-                best = Math.max(best, current);
-            } else {
-                // today has no completed actions -> reset
-                current = 0;
-            }
-        } else {
-            // first update today
-            if (todayCompleted) {
-                // if yesterday had >=1, we continue streak; otherwise start at 1
-                current = (yesterdayCompleted >= 1) ? (current + 1) : 1;
-                best = Math.max(best, current);
-            } else {
-                current = 0;
-            }
+        if (!alreadyUpdatedToday) {
+            // First update of the day
+            // If yesterday was completed, our "base" streak is whatever current was.
+            // If yesterday was NOT completed, our "base" streak is 0.
+            previousStreak = yesterdayCompleted ? current : 0;
         }
+
+        // Calculate new current based on previousStreak
+        if (todayCompleted) {
+            current = previousStreak + 1;
+        } else {
+            // If not completed today (yet, or undone), we revert to previousStreak.
+            // This shows the "pending" streak (e.g. 5) instead of 0.
+            current = previousStreak;
+        }
+
+        best = Math.max(best, current);
 
         // persist
         try {
-
             await setDoc(docRef, {
                 current,
                 best,
+                previousStreak,
                 updatedAt: Date.now()
             }, { merge: true });
         } catch (err) {

@@ -58,15 +58,22 @@ export class PerformanceService {
         }
     }
 
-    // Return Today date key (YYYY-MM-DD) 
+    // Return Today date key (YYYY-MM-DD) in Local Time
     private todayKey(): string {
-        return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     private yesterdayKey(): string {
         const d = new Date();
         d.setDate(d.getDate() - 1);
-        return d.toISOString().slice(0, 10); // YYYY-MM-DD
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     // Expose keys to use elsewhere
