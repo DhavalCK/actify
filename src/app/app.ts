@@ -5,6 +5,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Action } from './models/action.model';
 import { DashboardService } from './services/dashboard.service';
 import { AuthService } from './services/auth.service';
+import { MotivationService } from './services/motivation.service';
 
 @Component({
   selector: 'app-root',
@@ -20,13 +21,15 @@ export class App {
   actionService = inject(ActionsService);
   auth = inject(AuthService);
   dashboard = inject(DashboardService);
+  motivation = inject(MotivationService)
   actions: Action[] = [];
 
   constructor() {
-    effect(() => {
+    effect(async () => {
       if (this.auth.userId) {
-        this.dashboard.getTodayPerformance();
-        this.dashboard.getStreakInfo();
+        await this.dashboard.getTodayPerformance();
+        await this.dashboard.getStreakInfo();
+        await this.motivation.getMotivation();
       }
     })
   }
