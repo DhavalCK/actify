@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, effect } from '@angular/core';
 import { Action } from '../models/action.model';
 import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
@@ -25,24 +25,19 @@ export class ActionsService {
     this.performance = inject(PerformanceService);
     this.streakServ = inject(StreakService);
 
-    this.auth.uid$.subscribe((uid) => {
-      if (!uid) this.actions.set([]);
+    effect(() => {
+      if (!this.auth.userId) this.actions.set([]);
 
-      // Get and Set Actions
-      this.getAndSetActions()
+      this.getAndSetActions();
     })
   }
 
-  get userId() {
-    return this.auth.currentUid;
-  }
-
   get authCollectionPath() {
-    return `users/${this.userId}/${this.collectionPath}`;
+    return `users/${this.auth.userId}/${this.collectionPath}`;
   }
 
   getAndSetActions() {
-    if (!this.userId) return;
+    if (!this.auth.userId) return;
     // Created pointer to actions collection
     const colRef = collection(this.db, this.authCollectionPath);
     const q = query(colRef, orderBy('createdAt', 'desc'));
@@ -58,15 +53,8 @@ export class ActionsService {
     })
   }
 
-  // get todayTasks(): Action[] {
-  //   const now = new Date();
-  //   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
-  //   const end = start + 24 * 60 * 60 * 1000 - 1;
-  //   return this.actions().filter(a => (a.createdAt ?? 0) >= start && (a.createdAt ?? 0) <= end);
-  // }
-
   async computeTodayCountsFromFirestore() {
-    if (!this.userId) return { completed: 0, total: 0 };
+    if (!this.auth.userId) return { completed: 0, total: 0 };
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
     const end = start + 24 * 60 * 60 * 1000 - 1;
@@ -105,7 +93,7 @@ export class ActionsService {
 
   // Add action 
   async add(title: string) {
-    if (!this.userId) return;
+    if (!this.auth.userId) return;
 
     const colRef = collection(this.db, this.authCollectionPath);
     const docRef = await addDoc(colRef, {
@@ -119,7 +107,7 @@ export class ActionsService {
 
   // Remove Action
   async remove(id: string) {
-    if (!this.userId) return;
+    if (!this.auth.userId) return;
 
     const docRef = doc(this.db, this.authCollectionPath, id);
     await deleteDoc(docRef);
@@ -129,7 +117,7 @@ export class ActionsService {
 
   // Toggle Action
   async toggleDone(action: Action) {
-    if (!this.userId) return;
+    if (!this.auth.userId) return;
 
     const docRef = doc(this.db, this.authCollectionPath, action.id);
     await updateDoc(docRef, {

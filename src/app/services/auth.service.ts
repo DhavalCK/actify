@@ -1,6 +1,5 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { BehaviorSubject } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -8,7 +7,7 @@ import { BehaviorSubject } from "rxjs";
 export class AuthService {
 
     // holds current uid (null until signed)
-    uid$ = new BehaviorSubject<string | null>(null);
+    uidSignal = signal<string | null>(null);
 
     constructor() {
         const auth = getAuth();
@@ -16,7 +15,7 @@ export class AuthService {
         // listen for auth state changes
         onAuthStateChanged(auth, user => {
             if (user) {
-                this.uid$.next(user.uid);
+                this.uidSignal.set(user.uid);
             } else {
                 // if no user, request anonymous sign-in
                 signInAnonymously(auth).catch(err => {
@@ -26,7 +25,7 @@ export class AuthService {
         })
     }
 
-    get currentUid(): string | null {
-        return this.uid$?.value ?? null;
+    get userId() {
+        return this.uidSignal();
     }
 }

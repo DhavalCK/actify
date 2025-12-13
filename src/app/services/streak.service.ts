@@ -26,7 +26,7 @@ export class StreakService {
     }
 
     async getStreakInfo() {
-        const uid = this.auth?.currentUid;
+        const uid = this.auth?.userId;
         if (!uid) return null;
 
         const docRef = doc(this.db, 'users', uid, 'streak', 'info');
@@ -41,7 +41,7 @@ export class StreakService {
 
     // Pass whether today has >=1 completed action and Write Streak data
     async updateStreak(todayCompleted: boolean) {
-        const uid = this.auth?.currentUid;
+        const uid = this.auth?.userId;
         if (!uid) return;
 
         const docRef = doc(this.db, 'users', uid, 'streak', 'info');

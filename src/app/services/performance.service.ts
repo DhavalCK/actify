@@ -13,7 +13,7 @@ export class PerformanceService {
 
     // Save today's performance under: users/{uid}/performance/{YYYY-MM-DD}
     async saveToday(completed: number, total: number) {
-        const uid = this.currentUid();
+        const uid = this.auth.userId;
 
         if (!uid) {
             console.warn('PerformanceService.saveToday: no uid yet');
@@ -41,7 +41,7 @@ export class PerformanceService {
 
     // Returns DocumentSnapshot | null
     async getPerfomanceDoc(dateKey: string): Promise<DocumentSnapshot | null> {
-        const uid = this.currentUid();
+        const uid = this.auth.userId;
 
         if (!uid) {
             console.warn('PerformanceService.getPerfomanceDoc: no uid yet');
@@ -56,11 +56,6 @@ export class PerformanceService {
             console.error('Get Performance Error: ', err);
             return null;
         }
-    }
-
-    private currentUid() {
-        // auth exposes uid$ BehaviorSubject per earlier steps
-        return (this.auth?.uid$?.value) ?? null;
     }
 
     // Return Today date key (YYYY-MM-DD) 
