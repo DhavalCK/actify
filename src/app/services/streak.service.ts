@@ -13,7 +13,7 @@ export class StreakService {
 
     constructor(
         private auth: AuthService,
-        private performance: PerformanceService
+        private performance: PerformanceService,
     ) { }
 
     // return whether yesterday had >= 1 completed action

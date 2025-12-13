@@ -3,6 +3,8 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActionsService } from './services/actions.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Action } from './models/action.model';
+import { DashboardService } from './services/dashboard.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -16,9 +18,17 @@ export class App {
   actionTitle = new FormControl('');
 
   actionService = inject(ActionsService);
+  auth = inject(AuthService);
+  dashboard = inject(DashboardService);
   actions: Action[] = [];
 
   constructor() {
+    effect(() => {
+      if (this.auth.userId) {
+        this.dashboard.getTodayPerformance();
+        this.dashboard.getStreakInfo();
+      }
+    })
   }
 
   get actionsSignal() {
@@ -38,5 +48,9 @@ export class App {
 
   toggle(action: Action) {
     this.actionService.toggleDone(action);
+  }
+
+  get date() {
+    return new Date();
   }
 }

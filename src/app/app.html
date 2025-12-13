@@ -5,7 +5,7 @@
                 <h1 class="text-3xl font-extrabold leading-tight text-slate-950">Actify</h1>
                 <p class="text-sm text-slate-600 mt-1">Small daily wins, big momentum.</p>
             </div>
-            <div class="text-sm text-slate-600">Today</div>
+            <div class="text-sm text-slate-600">Today · {{ date | date: 'EEE, MMM d'}}</div>
         </header>
 
         <section class="bg-white rounded-2xl shadow-xl p-5 -mt-2">
@@ -15,13 +15,20 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-xs text-slate-500">Daily completion</div>
-                            <div class="text-lg font-semibold text-slate-800">42%</div>
+                            <div class="text-lg font-semibold text-slate-800">{{ dashboard.dailyRatio() }}%</div>
                         </div>
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg ring-4 ring-blue-50">
-                            <div class="text-white text-center leading-tight">
-                                <div class="text-[10px] font-medium opacity-90">STREAK</div>
-                                <div class="font-bold text-xl">3</div>
+                        <div class="flex gap-4">
+                            <div class="text-orange-700 w-auto h-20 p-2 rounded-lg bg-orange-50 flex items-center justify-center shadow-lg ring-4 ring-red-50
+                            flex gap-0 flex-col">
+                                <div class="text-3xl drop-shadow-md drop-shadow-orange-300">🔥</div>
+                                <div class="text-sm opacity-90 font-semibold">Current Streak</div>
+                                <div class="font-bold text-xl">{{ dashboard.currentStreak() }}</div>
+                            </div>
+                            <div class="text-yellow-700 w-auto h-20 p-2 rounded-lg bg-yellow-50 flex items-center justify-center shadow-lg ring-4 ring-yellow-50
+                            flex gap-0 flex-col">
+                                <div class="text-3xl drop-shadow-xl drop-shadow-yellow-900">🏆</div>
+                                <div class="text-sm opacity-90 font-semibold">Best Streak</div>
+                                <div class="font-bold text-xl">{{ dashboard.bestStreak() }}</div>
                             </div>
                         </div>
                     </div>
