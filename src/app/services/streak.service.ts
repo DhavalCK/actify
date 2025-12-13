@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { Auth } from "@angular/fire/auth";
 import { doc, getDoc, getFirestore, setDoc } from "@angular/fire/firestore";
 import { AuthService } from "./auth.service";
@@ -16,6 +16,9 @@ export class StreakService {
         private performance: PerformanceService,
     ) { }
 
+    // Reactive state for streak info
+    readonly streakInfo = signal<{ current: number, best: number } | null>(null);
+
     // return whether yesterday had >= 1 completed action
     async getYesterdayStatus(): Promise<number> {
         const key = this.performance.getYesterdayKey();
@@ -32,7 +35,12 @@ export class StreakService {
         const docRef = doc(this.db, 'users', uid, 'streak', 'info');
         try {
             const snap = await getDoc(docRef);
-            return snap.exists() ? snap : null;
+            if (snap.exists()) {
+                const data = snap.data() as any;
+                this.streakInfo.set({ current: data.current ?? 0, best: data.best ?? 0 });
+                return snap;
+            }
+            return null;
         } catch (err) {
             console.error('getStreakInfo error', err);
             return null;
@@ -96,6 +104,9 @@ export class StreakService {
         }
 
         best = Math.max(best, current);
+
+        // Update reactive state
+        this.streakInfo.set({ current, best });
 
         // persist
         try {

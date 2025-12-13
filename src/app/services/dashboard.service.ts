@@ -1,4 +1,4 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, signal, effect } from "@angular/core";
 import { PerformanceService } from "./performance.service";
 import { StreakService } from "./streak.service";
 
@@ -15,6 +15,14 @@ export class DashboardService {
         private performanceService: PerformanceService,
         private streakService: StreakService
     ) {
+        // Sync streak info from service to local signal
+        effect(() => {
+            const info = this.streakService.streakInfo();
+            if (info) {
+                this.bestStreak.set(info.best);
+                this.currentStreak.set(info.current);
+            }
+        }, { allowSignalWrites: true });
     }
 
     async getTodayPerformance() {
@@ -26,11 +34,7 @@ export class DashboardService {
     }
 
     async getStreakInfo() {
-        const snap = await this.streakService.getStreakInfo();
-        if (snap?.exists()) {
-            const { best, current } = snap.data();
-            this.bestStreak.set(best);
-            this.currentStreak.set(current);
-        }
+        // Initial fetch to populate the signal in service
+        await this.streakService.getStreakInfo();
     }
 }
