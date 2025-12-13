@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { AuthService } from "./auth.service";
 import { doc, DocumentSnapshot, getDoc, getFirestore, setDoc } from "@angular/fire/firestore";
 
@@ -9,7 +9,12 @@ export class PerformanceService {
 
     private db = getFirestore();
 
-    constructor(private auth: AuthService) { }
+    constructor(
+        private auth: AuthService,
+    ) { }
+
+    // Reactive state for performance info
+    readonly performanceInfo = signal<{ ratio: number } | null>(null);
 
     // Save today's performance under: users/{uid}/performance/{YYYY-MM-DD}
     async saveToday(completed: number, total: number) {
@@ -26,13 +31,15 @@ export class PerformanceService {
         try {
             const docRef = doc(this.db, 'users', uid, 'performance', dateKey);
 
-            await setDoc(docRef, {
+            const data = {
                 date: dateKey,
                 completed,
                 total,
                 ratio,
                 updatedAt: Date.now()
-            }, { merge: true })
+            }
+            await setDoc(docRef, data, { merge: true });
+            this.performanceInfo.set(data);
 
         } catch (err) {
             console.error('PerformanceService.saveToday error', err);
@@ -51,6 +58,14 @@ export class PerformanceService {
         try {
             const docRef = doc(this.db, 'users', uid, 'performance', dateKey);
             const snap = await getDoc(docRef);
+            if (snap?.exists()) {
+                const { date, ratio } = snap?.data();
+                if (this.todayKey() === date) {
+                    this.performanceInfo.set({
+                        ratio: ratio
+                    });
+                }
+            }
             return snap;
         } catch (err) {
             console.error('Get Performance Error: ', err);

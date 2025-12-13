@@ -6,7 +6,7 @@ import { StreakService } from "./streak.service";
     providedIn: 'root'
 })
 export class DashboardService {
-    readonly dailyRatio = signal('0');
+    readonly dailyRatio = signal(0);
     readonly currentStreak = signal(0);
     readonly bestStreak = signal(0);
     readonly todayLabel = new Date();
@@ -17,24 +17,26 @@ export class DashboardService {
     ) {
         // Sync streak info from service to local signal
         effect(() => {
-            const info = this.streakService.streakInfo();
-            if (info) {
-                this.bestStreak.set(info.best);
-                this.currentStreak.set(info.current);
+            const streakInfo = this.streakService.streakInfo();
+            if (streakInfo) {
+                this.bestStreak.set(streakInfo.best);
+                this.currentStreak.set(streakInfo.current);
+            }
+
+            const performanceInfo = this.performanceService.performanceInfo();
+            if (performanceInfo) {
+                this.dailyRatio.set(performanceInfo.ratio);
             }
         }, { allowSignalWrites: true });
     }
 
     async getTodayPerformance() {
-        const snap = await this.performanceService.getPerfomanceDoc(this.performanceService.getTodayKey());
-        if (snap?.exists()) {
-            const { ratio } = snap.data();
-            this.dailyRatio.set(ratio);
-        }
+        // Initial fetch to populate the signal in performance service
+        await this.performanceService.getPerfomanceDoc(this.performanceService.getTodayKey());
     }
 
     async getStreakInfo() {
-        // Initial fetch to populate the signal in service
+        // Initial fetch to populate the signal in streak service
         await this.streakService.getStreakInfo();
     }
 }
