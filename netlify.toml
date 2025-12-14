@@ -3,6 +3,9 @@
   publish = "dist/actify"
   functions="netlify/functions"
 
+[build.environment]
+  NETLIFY_USE_ANGULAR_RUNTIME = "false"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
