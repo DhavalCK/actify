@@ -1,2 +1,9 @@
 [build]
-    functions="netlify/functions"
+  command = "npm run build"
+  publish = "dist/actify"
+  functions="netlify/functions"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
