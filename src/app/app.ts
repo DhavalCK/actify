@@ -1,23 +1,37 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActionsService } from './services/actions.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Action } from './models/action.model';
 import { DashboardService } from './services/dashboard.service';
 import { AuthService } from './services/auth.service';
 import { MotivationService } from './services/motivation.service';
+import { Shell } from './components/shell/shell';
+import { Header } from "./components/header/header";
+import { Motivation } from './components/motivation/motivation';
+import { ActionsContainer } from './components/actions-container/actions-container';
+import { DashboardStats } from "./components/dashboard-stats/dashboard-stats";
+
+const COMPONENTS = [
+  Shell,
+  Header,
+  Motivation,
+  DashboardStats,
+  ActionsContainer,
+]
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe],
+  imports: [
+    CommonModule, FormsModule, ReactiveFormsModule,
+    ...COMPONENTS,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
 
   protected readonly title = signal('actify');
-  protected readonly motivationText = signal('');
-  actionTitle = new FormControl('');
 
   actionService = inject(ActionsService);
   auth = inject(AuthService);
@@ -30,32 +44,8 @@ export class App {
       if (this.auth.userId) {
         await this.dashboard.getTodayPerformance();
         await this.dashboard.getStreakInfo();
-        const motivation = await this.motivationServ.getMotivation();
-        this.motivationText.set(motivation);
+        await this.motivationServ.getMotivation();
       }
     })
-  }
-
-  get actionsSignal() {
-    return this.actionService.actions();
-  }
-
-  add() {
-    const title = this.actionTitle.value?.trim() || '';
-    if (!title) return;
-    this.actionService.add(title);
-    this.actionTitle.reset();
-  }
-
-  remove(id: string) {
-    this.actionService.remove(id);
-  }
-
-  toggle(action: Action) {
-    this.actionService.toggleDone(action);
-  }
-
-  get date() {
-    return new Date();
   }
 }

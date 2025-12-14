@@ -1,0 +1,32 @@
+<section class="bg-white rounded-2xl shadow-xl p-5 my-1">
+    <!-- progress + quick metrics -->
+    <div class="flex items-center gap-4">
+        <div class="flex-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-500">Daily completion</div>
+                    <div class="text-lg font-semibold text-slate-800">{{ ratio() }}%</div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="text-orange-700 w-auto h-20 p-2 rounded-lg bg-orange-50 flex items-center justify-center shadow-lg ring-4 ring-red-50
+                            flex gap-0 flex-col">
+                        <div class="text-3xl drop-shadow-md drop-shadow-orange-300">🔥</div>
+                        <div class="text-sm opacity-90 font-semibold">Current Streak</div>
+                        <div class="font-bold text-xl">{{ current() }}</div>
+                    </div>
+                    <div class="text-yellow-700 w-auto h-20 p-2 rounded-lg bg-yellow-50 flex items-center justify-center shadow-lg ring-4 ring-yellow-50
+                            flex gap-0 flex-col">
+                        <div class="text-3xl drop-shadow-xl drop-shadow-yellow-900">🏆</div>
+                        <div class="text-sm opacity-90 font-semibold">Best Streak</div>
+                        <div class="font-bold text-xl">{{ best() }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full mt-5 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-400 to-emerald-400 transition-[width] duration-300 ease-out"
+                    [ngStyle]="{width: ratio() + '%' }"></div>
+            </div>
+        </div>
+    </div>
+
+</section>

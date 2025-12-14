@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, signal } from "@angular/core";
 import { AuthService } from "./auth.service";
 import { doc, Firestore, getDoc, serverTimestamp, setDoc } from "@angular/fire/firestore";
 import { PerformanceService } from "./performance.service";
@@ -13,6 +13,9 @@ export class MotivationService {
     private auth: AuthService;
     private performanceService = inject(PerformanceService);
     private streakService = inject(StreakService);
+
+    motivationText = signal('');
+
 
     constructor() {
         AuthService
@@ -29,7 +32,8 @@ export class MotivationService {
 
         if (snap.exists()) {
             const data = snap.data() as any;
-            return data?.text;
+            this.motivationText.set(data?.text);
+            return;
         }
 
         await fetch("/.netlify/functions/generate-motivation", {
@@ -42,8 +46,7 @@ export class MotivationService {
         });
 
         const freshSnap = await getDoc(docRef);
-        return (freshSnap.data() as any)?.text ?? '';
 
-
+        this.motivationText.set((freshSnap.data() as any)?.text ?? '');
     }
 }
