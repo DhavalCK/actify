@@ -3,6 +3,9 @@
   publish = "dist/actify/browser"
   functions="netlify/functions"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "FIREBASE_PROJECT_ID"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
