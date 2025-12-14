@@ -3,8 +3,8 @@
   publish = "dist/actify"
   functions="netlify/functions"
 
-[build.environment]
-  NETLIFY_USE_ANGULAR_RUNTIME = "false"
+[context.production]
+  framework = "#static"
 
 [[redirects]]
   from = "/*"
