@@ -7,6 +7,23 @@
             </div>
             <div class="text-sm text-slate-600">Today · {{ date | date: 'EEE, MMM d'}}</div>
         </header>
+        <!-- Motivation text -->
+        <section class="mt-6 rounded-2xl p-5 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg
+                    transition-all duration-500 ease-out animate-fade-in">
+            <div class="text-xs uppercase tracking-wide opacity-80 mb-2">
+                Today’s motivation
+            </div>
+            <p *ngIf="motivationText(); else loading" class="text-lg font-medium leading-snug">
+                {{ motivationText() }}
+            </p>
+            <!-- Loading -->
+            <ng-template #loading>
+                <div class="space-y-2">
+                    <div class="h-[25px] w-full rounded bg-white/30 animate-pulse"></div>
+                </div>
+            </ng-template>
+        </section>
+
 
         <section class="bg-white rounded-2xl shadow-xl p-5 -mt-2">
             <!-- progress + quick metrics -->

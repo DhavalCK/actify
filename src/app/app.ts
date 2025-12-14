@@ -16,12 +16,13 @@ import { MotivationService } from './services/motivation.service';
 export class App {
 
   protected readonly title = signal('actify');
+  protected readonly motivationText = signal('');
   actionTitle = new FormControl('');
 
   actionService = inject(ActionsService);
   auth = inject(AuthService);
   dashboard = inject(DashboardService);
-  motivation = inject(MotivationService)
+  motivationServ = inject(MotivationService)
   actions: Action[] = [];
 
   constructor() {
@@ -29,7 +30,8 @@ export class App {
       if (this.auth.userId) {
         await this.dashboard.getTodayPerformance();
         await this.dashboard.getStreakInfo();
-        await this.motivation.getMotivation();
+        const motivation = await this.motivationServ.getMotivation();
+        this.motivationText.set(motivation);
       }
     })
   }
