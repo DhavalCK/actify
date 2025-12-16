@@ -1,7 +1,7 @@
 <header class="flex items-center justify-between mb-5">
     <div>
-        <h1 class="text-3xl font-extrabold leading-tight text-slate-950">Actify</h1>
-        <p class="text-sm text-slate-600 mt-1">Small daily wins, big momentum.</p>
+        <h1 class="text-xl sm:text-3xl font-extrabold leading-tight text-slate-950">Actify</h1>
+        <p class="hidden sm:block text-sm text-slate-600 mt-1">Small daily wins, big momentum.</p>
     </div>
-    <div class="text-sm text-slate-600">Today · {{ date | date: 'EEE, MMM d'}}</div>
+    <div class="text-xs sm:text-sm text-slate-600">Today · {{ date | date: 'EEE, MMM d'}}</div>
 </header>

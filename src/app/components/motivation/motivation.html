@@ -1,9 +1,9 @@
-<section class="rounded-2xl p-5 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg
+<section class="rounded-2xl p-3 md:p-5 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg
                     transition-all duration-500 ease-out animate-fade-in">
-    <div class="text-xs uppercase tracking-wide opacity-80 mb-2">
+    <div class="text-xs md:text-sm uppercase tracking-wide opacity-80 mb-1 md:mb-2">
         Today’s motivation
     </div>
-    <p *ngIf="isLoading()" class="text-lg font-medium leading-snug">
+    <p *ngIf="isLoading()" class="text-sm md:text-base font-medium leading-snug line-clamp-2 md:line-clamp-none">
         {{ motivationText() }}
     </p>
 
