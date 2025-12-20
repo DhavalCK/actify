@@ -1,38 +1,97 @@
 <!-- actions list -->
-<div class="space-y-3">
-    <ng-container *ngIf="actionsSignal.length; else empty">
-        <div *ngFor="let action of actionsSignal" (click)="toggle(action)"
-            class="group bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 
-                            p-2 md:p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition cursor-pointer" [ngClass]="{ 'bg-green-50' : action.done }">
-            <div class="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
-                [ngClass]="{'border-blue-500 bg-blue-500': action.done, 'border-slate-300': !action.done}">
-                <svg *ngIf="action.done" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
+<div>
+    <ng-container *ngIf="todayActions().length; else empty">
+        <div class="flex items-center gap-2 mb-4">
+            <h3 class="text-lg font-semibold text-slate-800">Today</h3>
+            <span
+                class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">{{todayActions().length}}</span>
+        </div>
+        <div class="space-y-3">
+            <div *ngFor="let action of todayActions()" (click)="toggle(action)"
+                class="group bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 
+                            p-3 md:p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition cursor-pointer" [ngClass]="{ 'bg-green-50' : action.done }">
+                <div class="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
+                    [ngClass]="{'border-blue-500 bg-blue-500': action.done, 'border-slate-300': !action.done}">
+                    <svg *ngIf="action.done" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
 
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                    <div class="truncate">
-                        <div [class.line-through]="action.done" [class.text-slate-400]="action.done"
-                            class="text-sm md:text-base font-medium text-slate-800 truncate transition-colors">
-                            {{ action.title }}
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <div class="truncate">
+                            <div [class.line-through]="action.done" [class.text-slate-400]="action.done"
+                                class="text-sm md:text-base font-medium text-slate-800 truncate transition-colors">
+                                {{ action.title }}
+                            </div>
+                            <div class="text-xs text-slate-500 mt-0.5">
+                                {{ action.createdAt | date:'shortTime' }}
+                            </div>
                         </div>
-                        <div class="text-xs text-slate-500 mt-0.5">
-                            {{ action.createdAt | date:'shortTime' }}
+
+                        <div class="flex items-center">
+                            <button (click)="$event.stopPropagation(); remove(action.id)"
+                                class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="pendingActions().length">
+        <div class="flex items-center gap-2 mb-4 mt-8">
+            <h3 class="text-lg font-semibold text-slate-800">Pending</h3>
+            <span
+                class="px-2 py-0.5 bg-orange-50 text-orange-600 text-xs font-medium rounded-full">{{pendingActions().length}}</span>
+        </div>
+        <div class="space-y-3">
+            <div *ngFor="let action of pendingActions()" (click)="toggle(action)"
+                class="group bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 
+                            p-2 md:p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition cursor-pointer" [ngClass]="{
+                                      'bg-green-50': action.done,
+                            }">
 
-                    <div class="flex items-center gap-3 ">
-                        <button (click)="$event.stopPropagation(); remove(action.id)"
-                            class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remove">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+                <div class="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
+                    [ngClass]="{'border-blue-500 bg-blue-500': action.done, 'border-slate-300': !action.done}">
+                    <svg *ngIf="action.done" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <div class="truncate">
+                            <div [class.line-through]="action.done" [class.text-slate-400]="action.done"
+                                class="text-sm md:text-base font-medium text-slate-800 truncate transition-colors">
+                                {{ action.title }}
+                            </div>
+                            <div class="text-xs text-slate-500 mt-0.5">
+                                {{ action.createdAt | date:'shortTime' }}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center ">
+                            <div class="px-3 py-1 rounded-full text-xs font-medium border transition-colors duration-200"
+                                [ngClass]="getUrgencyClasses(getDayCount(action))">
+                                Pending {{ getDayCount(action) }} days
+                            </div>
+                            <button (click)="$event.stopPropagation(); remove(action.id)"
+                                class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
