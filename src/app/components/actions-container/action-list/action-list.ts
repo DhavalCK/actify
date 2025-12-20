@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, input, Input, signal } from '@angular/core';
 import { ActionsService } from '../../../services/actions.service';
 import { Action } from '../../../models/action.model';
 
@@ -11,14 +11,23 @@ import { Action } from '../../../models/action.model';
 })
 export class ActionList {
 
-  actionService = inject(ActionsService);
-  todayActions = computed(() => this.actionsSignal.filter((action) => {
-    return action.createdAt >= this.todayStartDate.getTime();
-  }));
+  @Input() actions: Action[] = [];
+  @Input() title: string = '';
+  @Input() type: 'today' | 'pending' | 'done' = 'today';
 
-  pendingActions = computed(() => this.actionsSignal.filter((action) => {
-    return action.createdAt < this.todayStartDate.getTime() && !action.done;
-  }))
+  actionService = inject(ActionsService);
+
+  get isToday() {
+    return this.type === 'today';
+  }
+
+  get isPending() {
+    return this.type === 'pending';
+  }
+
+  get isDone() {
+    return this.type === 'done';
+  }
 
   constructor() {
   }

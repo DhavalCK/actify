@@ -126,4 +126,10 @@ export class ActionsService {
     await this.calculatePerformance();
     return;
   }
+
+  get todayStartDate(): Date {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
 }

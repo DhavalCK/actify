@@ -12,12 +12,16 @@ import { Motivation } from './components/motivation/motivation';
 import { ActionsContainer } from './components/actions-container/actions-container';
 import { DashboardStats } from "./components/dashboard-stats/dashboard-stats";
 
+import { BottomNav, Tab } from './components/bottom-nav/bottom-nav';
+import { History } from "./components/history/history";
+
 const COMPONENTS = [
   Shell,
   Header,
   Motivation,
   DashboardStats,
   ActionsContainer,
+  BottomNav,
 ]
 
 @Component({
@@ -25,6 +29,7 @@ const COMPONENTS = [
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
     ...COMPONENTS,
+    History
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
@@ -32,6 +37,7 @@ const COMPONENTS = [
 export class App {
 
   protected readonly title = signal('actify');
+  currentView = signal<Tab>('daily');
 
   actionService = inject(ActionsService);
   auth = inject(AuthService);
