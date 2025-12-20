@@ -14,6 +14,7 @@ import { DashboardStats } from "./components/dashboard-stats/dashboard-stats";
 
 import { BottomNav, Tab } from './components/bottom-nav/bottom-nav';
 import { History } from "./components/history/history";
+import { ActionInput } from "./components/actions-container/action-input/action-input";
 
 const COMPONENTS = [
   Shell,
@@ -22,6 +23,8 @@ const COMPONENTS = [
   DashboardStats,
   ActionsContainer,
   BottomNav,
+  ActionInput,
+  History
 ]
 
 @Component({
@@ -38,6 +41,7 @@ export class App {
 
   protected readonly title = signal('actify');
   currentView = signal<Tab>('daily');
+  isAddSheetOpen = signal(false);
 
   actionService = inject(ActionsService);
   auth = inject(AuthService);
@@ -53,5 +57,9 @@ export class App {
         await this.motivationServ.getMotivation();
       }
     })
+  }
+
+  toggleAddSheet(isOpen: boolean) {
+    this.isAddSheetOpen.set(isOpen);
   }
 }

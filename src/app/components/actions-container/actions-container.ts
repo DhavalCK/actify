@@ -1,11 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
-import { ActionInput } from "./action-input/action-input";
 import { ActionList } from "./action-list/action-list";
 import { ActionsService } from '../../services/actions.service';
 
 @Component({
   selector: 'app-actions-container',
-  imports: [ActionInput, ActionList],
+  imports: [ActionList],
   templateUrl: './actions-container.html',
   styleUrl: './actions-container.scss',
 })

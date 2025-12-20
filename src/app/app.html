@@ -18,5 +18,25 @@
 
         <app-bottom-nav [activeTab]="currentView()" (tabChange)="currentView.set($event)"
             class="flex-none z-40 bg-white"></app-bottom-nav>
+
+        <!-- FAB -->
+        <button *ngIf="currentView() === 'daily'" (click)="toggleAddSheet(true)"
+            class="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center z-30 hover:scale-105 active:scale-95 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+
+        <!-- Bottom Sheet Backdrop -->
+        <div *ngIf="isAddSheetOpen()" (click)="toggleAddSheet(false)"
+            class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity"></div>
+
+        <!-- Bottom Sheet -->
+        <div *ngIf="isAddSheetOpen()"
+            class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-4 pb-8 z-50 shadow-2xl transform transition-transform animate-slide-up">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
+            <app-action-input (closeSheet)="toggleAddSheet(false)"></app-action-input>
+        </div>
     </div>
 </app-shell>

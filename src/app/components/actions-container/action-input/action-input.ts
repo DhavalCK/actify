@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Output, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActionsService } from '../../../services/actions.service';
 
@@ -9,9 +9,18 @@ import { ActionsService } from '../../../services/actions.service';
   styleUrl: './action-input.scss',
 })
 export class ActionInput {
+  @Output() closeSheet = new EventEmitter<void>();
+  @ViewChild('inputField') inputField!: ElementRef<HTMLInputElement>;
+
   actionTitle = new FormControl('');
 
   actionService: ActionsService = inject(ActionsService);
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.inputField?.nativeElement?.focus();
+    }, 100);
+  }
 
   // Add action
   onSubmit() {
@@ -19,6 +28,7 @@ export class ActionInput {
     if (!title) return;
     this.actionService.add(title);
     this.actionTitle.reset();
+    this.closeSheet.emit();
   }
 
 }
