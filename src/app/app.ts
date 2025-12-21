@@ -15,6 +15,7 @@ import { DashboardStats } from "./components/dashboard-stats/dashboard-stats";
 import { BottomNav, Tab } from './components/bottom-nav/bottom-nav';
 import { History } from "./components/history/history";
 import { ActionInput } from "./components/actions-container/action-input/action-input";
+import { Stats } from "./components/stats/stats";
 
 const COMPONENTS = [
   Shell,
@@ -24,15 +25,15 @@ const COMPONENTS = [
   ActionsContainer,
   BottomNav,
   ActionInput,
-  History
+  History,
+  Stats
 ]
 
 @Component({
   selector: 'app-root',
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    ...COMPONENTS,
-    History
+    ...COMPONENTS
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

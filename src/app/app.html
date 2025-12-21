@@ -16,6 +16,10 @@
             <app-history></app-history>
         </div>
 
+        <div class="flex-1 min-h-0 overflow-y-auto" *ngIf="currentView() === 'stats'">
+            <app-stats></app-stats>
+        </div>
+
         <app-bottom-nav [activeTab]="currentView()" (tabChange)="currentView.set($event)"
             class="flex-none z-40 bg-white"></app-bottom-nav>
 

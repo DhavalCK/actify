@@ -13,8 +13,6 @@ export class DashboardStats {
   dashboard = inject(DashboardService);
 
   ratio = this.dashboard.dailyRatio;
-  current = this.dashboard.currentStreak;
-  best = this.dashboard.bestStreak;
 
 
 }

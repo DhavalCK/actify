@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type Tab = 'daily' | 'history';
+export type Tab = 'daily' | 'history' | 'stats';
 
 @Component({
-    selector: 'app-bottom-nav',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-bottom-nav',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="flex items-center justify-around bg-white border-t border-slate-100 py-1.5 pb-safe">
       <button (click)="select('daily')" 
               class="flex flex-col items-center gap-1 p-1.5 min-w-[64px] transition-all duration-200 rounded-xl"
@@ -26,14 +26,23 @@ export type Tab = 'daily' | 'history';
         </svg>
         <span class="text-[10px] font-semibold">History</span>
       </button>
+
+      <button (click)="select('stats')" 
+              class="flex flex-col items-center gap-1 p-1.5 min-w-[64px] transition-all duration-200 rounded-xl"
+              [ngClass]="activeTab === 'stats' ? 'text-blue-600 bg-blue-50' : 'text-slate-400 hover:text-slate-600'">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span class="text-[10px] font-semibold">Stats</span>
+      </button>
     </div>
   `
 })
 export class BottomNav {
-    @Input() activeTab: Tab = 'daily';
-    @Output() tabChange = new EventEmitter<Tab>();
+  @Input() activeTab: Tab = 'daily';
+  @Output() tabChange = new EventEmitter<Tab>();
 
-    select(tab: Tab) {
-        this.tabChange.emit(tab);
-    }
+  select(tab: Tab) {
+    this.tabChange.emit(tab);
+  }
 }
