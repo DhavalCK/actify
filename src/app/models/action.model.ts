@@ -3,4 +3,5 @@ export interface Action {
     title: string;
     done: boolean;
     createdAt: number;
+    doneAt?: number;
 }

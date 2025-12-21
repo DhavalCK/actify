@@ -47,7 +47,8 @@ export class ActionsService {
         id: d.id,
         title: d.title,
         done: !!d.done,
-        createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : (d.createdAt ?? Date.now())
+        createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : (d.createdAt ?? Date.now()),
+        doneAt: d.doneAt?.toMillis ? d.doneAt.toMillis() : d.doneAt
       }) as Action);
       this.actions.set(formatted);
     })
@@ -119,9 +120,12 @@ export class ActionsService {
   async toggleDone(action: Action) {
     if (!this.auth.userId) return;
 
+    const newDoneState = !action.done;
     const docRef = doc(this.db, this.authCollectionPath, action.id);
+
     await updateDoc(docRef, {
-      done: !action.done
+      done: newDoneState,
+      doneAt: newDoneState ? Date.now() : null
     });
     await this.calculatePerformance();
     return;

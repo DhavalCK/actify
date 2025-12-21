@@ -29,7 +29,10 @@
                                 {{ action.title }}
                             </div>
                             <div class="text-xs text-slate-500 mt-0.5">
-                                {{ action.createdAt | date:'shortTime' }}
+                                <span *ngIf="action.done && action.doneAt">Completed at {{ action.doneAt |
+                                    date:'shortTime' }}</span>
+                                <span *ngIf="!action.done || !action.doneAt">{{ action.createdAt | date:'shortTime'
+                                    }}</span>
                             </div>
                         </div>
 

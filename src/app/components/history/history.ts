@@ -23,17 +23,28 @@ export class History {
     const actionsMap = new Map<string, Action[]>();
 
     completedActions.forEach((action) => {
-      const date = new Date(action.createdAt).toLocaleDateString();
+      const timestamp = action.doneAt || action.createdAt;
+      const date = new Date(timestamp).toLocaleDateString();
       const list = actionsMap.get(date) || [];
       list.push(action);
       actionsMap.set(date, list);
     });
 
-    const sorted = Array.from(actionsMap).sort((a, b) => {
+    // Sort groups by date descending
+    const sortedGroups = Array.from(actionsMap).sort((a, b) => {
       return new Date(b[0]).getTime() - new Date(a[0]).getTime();
     });
 
-    return sorted;
+    // Sort actions within groups by time descending
+    sortedGroups.forEach(group => {
+      group[1].sort((a, b) => {
+        const timeA = a.doneAt || a.createdAt;
+        const timeB = b.doneAt || b.createdAt;
+        return timeB - timeA;
+      });
+    });
+
+    return sortedGroups;
   });
 
   isToday(date: Date): boolean {
