@@ -5,12 +5,26 @@
 @tailwind utilities;
 
 html,
-body,
-* {
+body {
     padding: 0;
     margin: 0;
-}
+    font-family: 'Inter', sans-serif;
+    /* Use Inter for premium feel */
+    color: #1e293b;
+    /* slate-800 default */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
-.rounded-2xl {
-    border-radius: 1rem;
+    .rounded-2xl {
+        border-radius: 1rem;
+    }
+
+    /* Safe area utility */
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+
+    .pt-safe {
+        padding-top: env(safe-area-inset-top, 8px);
+    }
 }

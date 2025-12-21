@@ -1,16 +1,15 @@
-<section class="bg-white rounded-2xl shadow-xl p-3 md:p-5 pb-2 my-2 md:my-3">
+<section class="bg-white rounded-xl border border-slate-100 p-4 pb-3 my-3">
     <!-- progress + quick metrics -->
     <div class="flex items-center gap-3 md:gap-4">
         <div class="flex-1">
             <div class="flex items-center justify-between gap-4">
                 <div class="flex flex-col justify-center flex-1">
-                    <div class="flex items-center gap-2 ">
-                        <div class="text-xs text-slate-500">Daily completion</div>
-                        <div></div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="text-xs font-medium text-slate-500">Daily completion</div>
+                        <div class="text-xs font-bold text-slate-800">{{ ratio() }}%</div>
                     </div>
-                    <div class="text-base md:text-lg font-semibold text-slate-800 mb-1">{{ ratio() }}%</div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden w-full">
-                        <div class="h-full bg-gradient-to-r from-blue-400 to-emerald-400 transition-[width] duration-300 ease-out"
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden w-full">
+                        <div class="h-full bg-blue-500 transition-[width] duration-300 ease-out"
                             [ngStyle]="{width: ratio() + '%' }"></div>
                     </div>
                 </div>

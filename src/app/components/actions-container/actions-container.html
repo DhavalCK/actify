@@ -2,7 +2,7 @@
     <!-- List Container: Owns the scroll -->
     <div class="h-full flex flex-col relative overflow-hidden">
         <!-- List Container: Owns the scroll -->
-        <div class="md:p-5 flex-1 overflow-y-auto min-h-0 overscroll-contain">
+        <div class="md:p-5 flex-1 overflow-y-auto min-h-0 overscroll-contain pb-24">
             <app-action-list title="Today" [actions]="todayActions()"></app-action-list>
             <app-action-list title="Pending" [actions]="pendingActions()" type="pending"></app-action-list>
         </div>
