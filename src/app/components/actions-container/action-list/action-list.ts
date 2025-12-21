@@ -67,4 +67,26 @@ export class ActionList {
       return 'bg-red-50 text-red-700 border-red-200'; // Muted red
     }
   }
+
+  getDurationString(action: Action): string | null {
+    if (!action.doneAt || !action.createdAt) return null;
+
+    const durationMs = action.doneAt - action.createdAt;
+    if (durationMs < 0) return null;
+
+    const minutes = Math.floor(durationMs / (1000 * 60));
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const days = Math.floor(durationMs / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) {
+      return `${minutes} min`;
+    } else if (hours < 24) {
+      return `${hours} hrs`;
+    } else if (days < 7) {
+      return `${days} days`;
+    } else {
+      const weeks = (days / 7).toFixed(1).replace('.0', '');
+      return `${weeks} weeks`;
+    }
+  }
 }

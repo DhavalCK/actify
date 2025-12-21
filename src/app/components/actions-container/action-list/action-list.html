@@ -42,6 +42,10 @@
                                 [ngClass]="getUrgencyClasses(getDayCount(action))">
                                 Pending {{ getDayCount(action) }} days
                             </div>
+                            <div *ngIf="type === 'done' && getDurationString(action)"
+                                class="px-3 py-1 rounded-full text-xs font-medium border transition-colors duration-200 bg-slate-50 text-slate-500 border-slate-200">
+                                Completed in {{ getDurationString(action) }}
+                            </div>
                             <button (click)="$event.stopPropagation(); remove(action.id)"
                                 class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Remove">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
