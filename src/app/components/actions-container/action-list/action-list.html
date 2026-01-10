@@ -3,7 +3,7 @@
     <ng-container *ngIf="actions.length">
         <div class="flex items-center gap-2 my-2 px-1">
             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">{{ title }}</h3>
-            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full">{{ actions.length
+            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">{{ actions.length
                 }}</span>
         </div>
         <div class="space-y-2">
@@ -24,10 +24,10 @@
                     <div class="flex items-center justify-between gap-2">
                         <div class="truncate flex-1">
                             <div [class.line-through]="action.done" [class.text-slate-400]="action.done"
-                                class="text-sm font-medium text-slate-800 truncate transition-colors">
+                                class="text-base font-medium text-slate-800 truncate transition-colors">
                                 {{ action.title }}
                             </div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">
+                            <div class="text-xs text-slate-400 mt-0.5">
                                 <span *ngIf="action.done && action.doneAt">Completed at {{ action.doneAt |
                                     date:'shortTime' }}</span>
                                 <span *ngIf="!action.done || !action.doneAt">{{ action.createdAt | date:'shortTime'
@@ -37,12 +37,12 @@
 
                         <div class="flex items-center gap-2">
                             <div *ngIf="type === 'pending'"
-                                class="px-2 py-0.5 rounded-md text-[10px] font-medium border transition-colors duration-200 whitespace-nowrap"
+                                class="px-2 py-0.5 rounded-md text-xs font-medium border transition-colors duration-200 whitespace-nowrap"
                                 [ngClass]="getUrgencyClasses(getDayCount(action))">
                                 {{ getDayCount(action) }}d
                             </div>
                             <div *ngIf="type === 'done' && getDurationString(action)"
-                                class="px-2 py-0.5 rounded-md text-[10px] font-medium border transition-colors duration-200 bg-slate-50 text-slate-500 border-slate-100 whitespace-nowrap">
+                                class="px-2 py-0.5 rounded-md text-xs font-medium border transition-colors duration-200 bg-slate-50 text-slate-500 border-slate-100 whitespace-nowrap">
                                 {{ getDurationString(action) }}
                             </div>
                             <button (click)="$event.stopPropagation(); remove(action.id)"
