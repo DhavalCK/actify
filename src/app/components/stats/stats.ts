@@ -14,84 +14,85 @@ export class Stats {
     dashboardService = inject(DashboardService);
 
     // Consistency
-    currentStreak = this.dashboardService.currentStreak;
-    bestStreak = this.dashboardService.bestStreak;
+    // currentStreak = this.dashboardService.currentStreak;
+    // bestStreak = this.dashboardService.bestStreak;
 
-    // Completion Performance
-    completionStats = computed(() => {
+    // Consolidated Stats Computation
+    stats = computed(() => {
         const actions = this.actionsService.actions();
-        if (actions.length === 0) return { average: 0 };
+        const now = Date.now();
 
+        // Initial State
         const actionsByDate = new Map<string, { total: number; completed: number }>();
+        let procTotalDuration = 0;
+        let procSameDayCount = 0;
+        let procCount = 0;
+        let pendingTotalAge = 0;
+        let pendingMaxAge = 0;
+        let pendingCount = 0;
 
+        // Single Pass Loop
         actions.forEach(action => {
+            // 1. Completion Stats Data
             const date = new Date(action.createdAt).toLocaleDateString();
             const entry = actionsByDate.get(date) || { total: 0, completed: 0 };
             entry.total++;
             if (action.done) entry.completed++;
             actionsByDate.set(date, entry);
-        });
 
-        let totalPercentage = 0;
-        actionsByDate.forEach(entry => {
-            totalPercentage += (entry.completed / entry.total) * 100;
-        });
+            // 2. Procrastination Stats Data
+            if (action.done && action.doneAt) {
+                procCount++;
+                procTotalDuration += (action.doneAt - action.createdAt);
+                const created = new Date(action.createdAt);
+                const done = new Date(action.doneAt);
+                if (created.toDateString() === done.toDateString()) {
+                    procSameDayCount++;
+                }
+            }
 
-        const average = Math.round(totalPercentage / actionsByDate.size);
-        return { average };
-    });
-
-    // Procrastination Insight
-    procrastinationStats = computed(() => {
-        const actions = this.actionsService.actions().filter(a => a.done && a.doneAt);
-        if (actions.length === 0) return { averageTime: 'N/A', sameDay: 0, later: 0 };
-
-        let totalDuration = 0;
-        let sameDayCount = 0;
-
-        actions.forEach(action => {
-            const created = new Date(action.createdAt);
-            const done = new Date(action.doneAt!);
-
-            // Duration
-            totalDuration += (action.doneAt! - action.createdAt);
-
-            // Same day check
-            if (created.toDateString() === done.toDateString()) {
-                sameDayCount++;
+            // 3. Pending Stats Data
+            if (!action.done) {
+                pendingCount++;
+                const age = now - action.createdAt;
+                pendingTotalAge += age;
+                if (age > pendingMaxAge) pendingMaxAge = age;
             }
         });
 
-        const avgMs = totalDuration / actions.length;
-        const sameDay = Math.round((sameDayCount / actions.length) * 100);
+        // Calculate Completion
+        let totalPercentage = 0;
+        if (actionsByDate.size > 0) {
+            actionsByDate.forEach(entry => {
+                totalPercentage += (entry.completed / entry.total) * 100;
+            });
+        }
+        const completionAverage = actionsByDate.size > 0 ? Math.round(totalPercentage / actionsByDate.size) : 0;
+
+        // Calculate Procrastination
+        const procAvgMs = procCount > 0 ? procTotalDuration / procCount : 0;
+        const procSameDay = procCount > 0 ? Math.round((procSameDayCount / procCount) * 100) : 0;
+
+        // Calculate Pending
+        const pendingAvgAgeMs = pendingCount > 0 ? pendingTotalAge / pendingCount : 0;
 
         return {
-            averageTime: this.formatDuration(avgMs),
-            sameDay,
-            later: 100 - sameDay
-        };
-    });
-
-    // Pending Behavior
-    pendingStats = computed(() => {
-        const pendingActions = this.actionsService.actions().filter(a => !a.done);
-        if (pendingActions.length === 0) return { averageAge: '0 days', longest: '0 days' };
-
-        const now = Date.now();
-        let totalAge = 0;
-        let maxAge = 0;
-
-        pendingActions.forEach(action => {
-            const age = now - action.createdAt;
-            totalAge += age;
-            if (age > maxAge) maxAge = age;
-        });
-
-        const avgAgeMs = totalAge / pendingActions.length;
-
-        return {
-            averageAge: this.formatDuration(avgAgeMs),
-            longest: this.formatDuration(maxAge)
+            consistency: {
+                currentStreak: this.dashboardService.currentStreak(),
+                bestStreak: this.dashboardService.bestStreak()
+            },
+            completion: {
+                average: completionAverage
+            },
+            procrastination: {
+                averageTime: procCount > 0 ? this.formatDuration(procAvgMs) : 'N/A',
+                sameDay: procSameDay,
+                later: 100 - procSameDay
+            },
+            pending: {
+                averageAge: pendingCount > 0 ? this.formatDuration(pendingAvgAgeMs) : '0 days',
+                longest: pendingCount > 0 ? this.formatDuration(pendingMaxAge) : '0 days'
+            }
         };
     });
 
