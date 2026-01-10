@@ -16,9 +16,26 @@ export class History {
   actionService = inject(ActionsService);
   datePipe = inject(DatePipe);
 
+  // Optimization: Intermediate signal to filter completed actions
+  // Uses custom equality check to prevent downstream recalculations when 
+  // pending actions change or when Firestore emits new object references for unchanged data
+  completedActions = computed(() => {
+    return this.actionService.actions().filter(a => a.done);
+  }, {
+    equal: (a: Action[], b: Action[]) => {
+      if (a === b) return true;
+      if (a.length !== b.length) return false;
+      // Check if content is effectively the same (ignoring object identity)
+      return a.every((action, index) =>
+        action.id === b[index].id &&
+        action.doneAt === b[index].doneAt &&
+        action.createdAt === b[index].createdAt
+      );
+    }
+  });
+
   groupedActions = computed(() => {
-    const actions = this.actionService.actions();
-    const completedActions = actions.filter(action => action.done);
+    const completedActions = this.completedActions();
 
     const actionsMap = new Map<string, Action[]>();
 
