@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, effect } from '@angular/core';
 import { Action } from '../models/action.model';
-import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs, limit } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
 import { StreakService } from './streak.service';
@@ -12,8 +12,12 @@ export class ActionsService {
 
   // TEMP: when auth added we'll replace this with current user's uid
   private readonly collectionPath = `actions`; // later users/${uid}/actions
+  private readonly PAGE_SIZE = 50;
 
   actions = signal<Action[]>([]);
+  isLoading = signal<boolean>(false);
+  hasMore = signal<boolean>(true);
+
   private db: Firestore;
   private auth: AuthService;
   private performance: PerformanceService;
@@ -26,9 +30,12 @@ export class ActionsService {
     this.streakServ = inject(StreakService);
 
     effect(() => {
-      if (!this.auth.userId) this.actions.set([]);
-
-      this.getAndSetActions();
+      if (!this.auth.userId) {
+        this.actions.set([]);
+        this.resetPagination();
+      } else {
+        this.getAndSetActions();
+      }
     })
   }
 
@@ -36,11 +43,19 @@ export class ActionsService {
     return `users/${this.auth.userId}/${this.collectionPath}`;
   }
 
+  private resetPagination() {
+    this.hasMore.set(true);
+    this.isLoading.set(false);
+  }
+
   getAndSetActions() {
     if (!this.auth.userId) return;
-    // Created pointer to actions collection
+
+    this.resetPagination();
+
+    // Use real-time subscription with limit for recent actions
     const colRef = collection(this.db, this.authCollectionPath);
-    const q = query(colRef, orderBy('createdAt', 'desc'));
+    const q = query(colRef, orderBy('createdAt', 'desc'), limit(this.PAGE_SIZE));
 
     collectionData(q, { idField: 'id' }).subscribe((docs: any[]) => {
       const formatted = docs.map((d) => ({
@@ -50,8 +65,66 @@ export class ActionsService {
         createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : (d.createdAt ?? Date.now()),
         doneAt: d.doneAt?.toMillis ? d.doneAt.toMillis() : d.doneAt
       }) as Action);
-      this.actions.set(formatted);
-    })
+
+      // If we have older actions loaded, preserve them
+      const currentActions = this.actions();
+      if (currentActions.length > this.PAGE_SIZE) {
+        // Merge: keep real-time updates for first PAGE_SIZE, preserve older loaded actions
+        const olderActions = currentActions.slice(this.PAGE_SIZE);
+        this.actions.set([...formatted, ...olderActions]);
+      } else {
+        this.actions.set(formatted);
+        this.hasMore.set(docs.length === this.PAGE_SIZE);
+      }
+    });
+  }
+
+  async loadMoreActions() {
+    if (!this.auth.userId || !this.hasMore() || this.isLoading()) return;
+
+    const currentActions = this.actions();
+    if (currentActions.length === 0) return;
+
+    this.isLoading.set(true);
+
+    try {
+      const colRef = collection(this.db, this.authCollectionPath);
+
+      // Get the oldest action's timestamp from current list
+      const oldestAction = currentActions[currentActions.length - 1];
+      const oldestTimestamp = oldestAction.createdAt;
+
+      // Query for actions older than the oldest one we have
+      const q = query(
+        colRef,
+        orderBy('createdAt', 'desc'),
+        where('createdAt', '<', oldestTimestamp),
+        limit(this.PAGE_SIZE)
+      );
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        this.hasMore.set(false);
+        return;
+      }
+
+      const formatted = snapshot.docs.map((d) => ({
+        id: d.id,
+        title: d.data()['title'],
+        done: !!d.data()['done'],
+        createdAt: d.data()['createdAt']?.toMillis ? d.data()['createdAt'].toMillis() : (d.data()['createdAt'] ?? Date.now()),
+        doneAt: d.data()['doneAt']?.toMillis ? d.data()['doneAt'].toMillis() : d.data()['doneAt']
+      }) as Action);
+
+      // Append to existing actions
+      this.actions.update(current => [...current, ...formatted]);
+      this.hasMore.set(snapshot.docs.length === this.PAGE_SIZE);
+    } catch (err) {
+      console.error('loadMoreActions failed', err);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   async computeTodayCountsFromFirestore() {
