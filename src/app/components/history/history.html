@@ -1,4 +1,10 @@
-<div>
-    <app-action-list *ngFor="let map of groupedActions()" [title]="getTitle(map[0])" [actions]="map[1]"
-        type="done"></app-action-list>
+<div class="max-w-md mx-auto">
+    <ng-container *ngIf="groupedActions().length">
+        <app-action-list *ngFor="let map of groupedActions()" [title]="getTitle(map[0])" [actions]="map[1]"
+            type="done"></app-action-list>
+    </ng-container>
+
+    <div *ngIf="!groupedActions().length" class="flex flex-col items-center justify-center h-full py-4">
+        <p class="text-slate-400 font-medium">No actions completed yet</p>
+    </div>
 </div>

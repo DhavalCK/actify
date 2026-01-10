@@ -8,7 +8,8 @@ export type Tab = 'daily' | 'history' | 'stats';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-around bg-white/80 backdrop-blur-md border-t border-slate-100/50 py-3 pb-safe z-50">
+    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-around bg-white/80 backdrop-blur-md border-t border-slate-100/50 py-3 pb-safe z-50
+    max-w-md mx-auto">
       <button (click)="select('daily')" 
               class="flex flex-col items-center gap-1 p-2 min-w-[64px] transition-all duration-200 rounded-xl"
               [ngClass]="activeTab === 'daily' ? 'text-blue-600 bg-blue-50' : 'text-slate-400'">
