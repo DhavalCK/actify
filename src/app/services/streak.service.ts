@@ -54,14 +54,28 @@ export class StreakService {
 
         const docRef = doc(this.db, 'users', uid, 'streak', 'info');
 
-        // Read yesterday Status 
-        const yesterdayCompleted = (await this.getYesterdayStatus()) > 0;
+        // Read yesterday Status - Check UTC first, then Local (migration fallback)
+        const yesterdayKeyUTC = this.performance.getYesterdayKeyUTC();
+        const yesterdaySnapUTC = await this.performance.getPerfomanceDoc(yesterdayKeyUTC);
+        let yesterdayCompleted = false;
+
+        if (yesterdaySnapUTC?.exists() && (yesterdaySnapUTC.data() as any)?.completed > 0) {
+            yesterdayCompleted = true;
+        } else {
+            // Fallback: Check Local Yesterday (for migration/existing users)
+            const yesterdayKeyLocal = this.performance.getYesterdayKey();
+            const yesterdaySnapLocal = await this.performance.getPerfomanceDoc(yesterdayKeyLocal);
+            if (yesterdaySnapLocal?.exists() && (yesterdaySnapLocal.data() as any)?.completed > 0) {
+                yesterdayCompleted = true;
+            }
+        }
 
         // read existing streak doc
         let current = 0;
         let best = 0;
         let previousStreak = 0;
         let lastUpdatedTs = 0;
+        let lastUpdatedKey = '';
 
         try {
             const sSnap = await getDoc(docRef);
@@ -71,20 +85,27 @@ export class StreakService {
                 best = d.best ?? 0;
                 previousStreak = d.previousStreak ?? 0;
                 lastUpdatedTs = d.updatedAt ?? 0;
+                lastUpdatedKey = d.lastUpdatedKey ?? '';
             }
         } catch (err) {
             console.error('updateStreak: error reading streak info', err);
         }
 
-        // helper: same-day check
-        const todayKey = this.performance.getTodayKey();
-        const d = new Date(lastUpdatedTs || 0);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const lastUpdatedDateKey = lastUpdatedTs ? `${year}-${month}-${day}` : null;
+        // helper: same-day check using UTC
+        const todayKeyUTC = this.performance.getTodayKeyUTC();
 
-        const alreadyUpdatedToday = lastUpdatedDateKey === todayKey;
+        // Check if already updated today (UTC)
+        // We check both the explicit key (new way) and the timestamp (old way, converted to UTC key)
+        let alreadyUpdatedToday = lastUpdatedKey === todayKeyUTC;
+
+        if (!alreadyUpdatedToday && lastUpdatedTs) {
+            const d = new Date(lastUpdatedTs);
+            const year = d.getUTCFullYear();
+            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(d.getUTCDate()).padStart(2, '0');
+            const lastUpdatedDateKeyUTC = `${year}-${month}-${day}`;
+            alreadyUpdatedToday = lastUpdatedDateKeyUTC === todayKeyUTC;
+        }
 
         // Streak Logic
         if (!alreadyUpdatedToday) {
@@ -114,7 +135,8 @@ export class StreakService {
                 current,
                 best,
                 previousStreak,
-                updatedAt: Date.now()
+                updatedAt: Date.now(),
+                lastUpdatedKey: todayKeyUTC // Store UTC key for future checks
             }, { merge: true });
         } catch (err) {
             console.error('updateStreak: error saving streak', err);

@@ -25,7 +25,8 @@ export class PerformanceService {
             return;
         }
 
-        const dateKey = this.todayKey();
+        // Use UTC key for consistency across timezones
+        const dateKey = this.getTodayKeyUTC();
         const ratio = total === 0 ? 0 : Math.round((completed / total) * 100);
 
         try {
@@ -60,7 +61,8 @@ export class PerformanceService {
             const snap = await getDoc(docRef);
             if (snap?.exists()) {
                 const { date, ratio } = snap?.data();
-                if (this.todayKey() === date) {
+                // Check against UTC key
+                if (this.getTodayKeyUTC() === date) {
                     this.performanceInfo.set({
                         ratio: ratio
                     });
@@ -73,7 +75,7 @@ export class PerformanceService {
         }
     }
 
-    // Return Today date key (YYYY-MM-DD) in Local Time
+    // Return Today date key (YYYY-MM-DD) in Local Time - DEPRECATED but kept for migration
     private todayKey(): string {
         const d = new Date();
         const year = d.getFullYear();
@@ -88,6 +90,24 @@ export class PerformanceService {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // UTC Helpers for Timezone Independent Streaks
+    public getTodayKeyUTC(): string {
+        const d = new Date();
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    public getYesterdayKeyUTC(): string {
+        const d = new Date();
+        d.setUTCDate(d.getUTCDate() - 1);
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
 
