@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { ActionsService } from '../../services/actions.service';
 import { ActionList } from "../actions-container/action-list/action-list";
 import { CommonModule, DatePipe } from '@angular/common';
@@ -11,8 +11,9 @@ import { Action } from '../../models/action.model';
   templateUrl: './history.html',
   styleUrl: './history.scss',
 })
-export class History {
+export class History implements AfterViewInit {
 
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
   actionService = inject(ActionsService);
   datePipe = inject(DatePipe);
 
@@ -63,6 +64,26 @@ export class History {
 
     return sortedGroups;
   });
+
+  ngAfterViewInit() {
+    // Add scroll listener for infinite scroll
+    this.scrollContainer?.nativeElement?.addEventListener('scroll', () => {
+      this.onScroll();
+    });
+  }
+
+  onScroll() {
+    const element = this.scrollContainer?.nativeElement;
+    if (!element) return;
+
+    const scrollPosition = element.scrollTop + element.clientHeight;
+    const scrollHeight = element.scrollHeight;
+
+    // Trigger load more when user is 200px from bottom
+    if (scrollHeight - scrollPosition < 200 && this.actionService.hasMore() && !this.actionService.isLoading()) {
+      this.actionService.loadMoreActions();
+    }
+  }
 
   isToday(date: Date): boolean {
     const today = new Date();

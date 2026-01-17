@@ -1,11 +1,13 @@
 import { Component, computed, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { ActionList } from "./action-list/action-list";
+import { Motivation } from '../motivation/motivation';
+import { DashboardStats } from '../dashboard-stats/dashboard-stats';
 import { ActionsService } from '../../services/actions.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-actions-container',
-  imports: [ActionList, CommonModule],
+  imports: [ActionList, CommonModule, Motivation, DashboardStats],
   templateUrl: './actions-container.html',
   styleUrl: './actions-container.scss',
 })

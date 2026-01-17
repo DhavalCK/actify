@@ -4,27 +4,14 @@
             <app-header></app-header>
         </div>
 
-        <div class="flex-1 min-h-0 flex flex-col" *ngIf="currentView() === 'daily'">
-            <div class="flex-none">
-                <app-motivation></app-motivation>
-                <app-dashboard-stats></app-dashboard-stats>
-            </div>
-            <app-actions-container class="flex-1 min-h-0"></app-actions-container>
+        <div class="flex-1 min-h-0 flex flex-col relative overflow-hidden">
+            <router-outlet></router-outlet>
         </div>
 
-        <div class="flex-1 min-h-0 overflow-y-auto" *ngIf="currentView() === 'history'">
-            <app-history></app-history>
-        </div>
-
-        <div class="flex-1 min-h-0 overflow-y-auto" *ngIf="currentView() === 'stats'">
-            <app-stats></app-stats>
-        </div>
-
-        <app-bottom-nav [activeTab]="currentView()" (tabChange)="currentView.set($event)"
-            class="flex-none z-40 bg-white"></app-bottom-nav>
+        <app-bottom-nav class="flex-none z-40 bg-white"></app-bottom-nav>
 
         <!-- FAB -->
-        <button *ngIf="currentView() === 'daily'" (click)="toggleAddSheet(true)"
+        <button *ngIf="isDailyView()" (click)="toggleAddSheet(true)"
             class="absolute bottom-20 right-4 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center z-30 hover:scale-105 active:scale-95 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">

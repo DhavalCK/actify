@@ -42,11 +42,11 @@
                                 {{ getDayCount(action) }}d
                             </div>
                             <div *ngIf="type === 'done' && getDurationString(action)"
-                                class="px-2 py-0.5 rounded-md text-xs font-medium border transition-colors duration-200 bg-slate-50 text-slate-500 border-slate-100 whitespace-nowrap">
+                                class="px-2 py-0.5 rounded-md text-xs font-medium border transition-colors duration-200 bg-green-50 text-green-700 border-green-100 whitespace-nowrap">
                                 {{ getDurationString(action) }}
                             </div>
-                            <button (click)="$event.stopPropagation(); remove(action.id)"
-                                class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            <button *ngIf="page === 'daily'" (click)="$event.stopPropagation(); remove(action.id)"
+                                class="p-1.5 text-rose-400 hover:text-rose-500 bg-rose-50 rounded-lg transition-colors"
                                 title="Remove">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">

@@ -14,6 +14,7 @@ export class ActionList {
   @Input() actions: Action[] = [];
   @Input() title: string = '';
   @Input() type: 'today' | 'pending' | 'done' = 'today';
+  @Input() page: 'daily' | 'history' = 'daily';
 
   actionService = inject(ActionsService);
 
