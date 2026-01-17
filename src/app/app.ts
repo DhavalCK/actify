@@ -61,6 +61,12 @@ export class App {
     });
   }
 
+  ngOnInit() {
+    // setTimeout(() => {
+    //   this.runSeed();
+    // }, 5000);
+  }
+
   toggleAddSheet(isOpen: boolean) {
     this.isAddSheetOpen.set(isOpen);
   }

@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, effect } from '@angular/core';
 import { Action } from '../models/action.model';
-import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs, limit } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, orderBy, query, updateDoc, where, getDocs, limit, startAfter } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
 import { StreakService } from './streak.service';
@@ -13,7 +13,7 @@ export class ActionsService {
 
   // TEMP: when auth added we'll replace this with current user's uid
   private readonly collectionPath = `actions`; // later users/${uid}/actions
-  private readonly PAGE_SIZE = 50;
+  private readonly PAGE_SIZE = 20;
 
   actions = signal<Action[]>([]);
   isLoading = signal<boolean>(false);
@@ -93,15 +93,22 @@ export class ActionsService {
     try {
       const colRef = collection(this.db, this.authCollectionPath);
 
-      // Get the oldest action's timestamp from current list
-      const oldestAction = currentActions[currentActions.length - 1];
-      const oldestTimestamp = oldestAction.createdAt;
+      // Get the last action to use as cursor
+      const lastAction = currentActions[currentActions.length - 1];
+      const lastDocRef = doc(this.db, this.authCollectionPath, lastAction.id);
+      const lastDocSnap = await getDoc(lastDocRef);
 
-      // Query for actions older than the oldest one we have
+      if (!lastDocSnap.exists()) {
+        // Should not happen, but if doc is missing, we can't paginate after it
+        this.hasMore.set(false);
+        return;
+      }
+
+      // Query for actions after the last one
       const q = query(
         colRef,
         orderBy('createdAt', 'desc'),
-        where('createdAt', '<', oldestTimestamp),
+        startAfter(lastDocSnap),
         limit(this.PAGE_SIZE)
       );
 
@@ -176,7 +183,7 @@ export class ActionsService {
     const docRef = await addDoc(colRef, {
       title: title.trim(),
       done: false,
-      createdAt: Date.now()
+      createdAt: new Date()
     });
     await this.calculatePerformance();
     return docRef.id;

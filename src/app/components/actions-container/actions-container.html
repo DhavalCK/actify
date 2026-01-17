@@ -4,7 +4,7 @@
             <app-motivation></app-motivation>
             <app-dashboard-stats></app-dashboard-stats>
         </div>
-        <div #scrollContainer class="md:p-5 flex-1 overflow-y-auto min-h-0 overscroll-contain pb-24">
+        <div #scrollContainer class="md:p-5 flex-1 overflow-y-auto min-h-0 overscroll-contain">
             <app-action-list title="Today" [actions]="todayActions()"></app-action-list>
             <app-action-list title="Pending" [actions]="pendingActions()" type="pending"></app-action-list>
 
