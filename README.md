@@ -30,10 +30,9 @@ Built with Angular and Firebase, the app offers a seamless offline-first experie
 ---
 
 ## Screenshots
-
-![Screenshot 1](assets/screens/screenshot-1.png)
-![Screenshot 2](assets/screens/screenshot-2.png)
-![Screenshot 3](assets/screens/screenshot-3.png)
+<img width="300" height="auto" alt="daily" src="https://github.com/user-attachments/assets/3442949e-10cc-46d8-9a71-9503cc8a78fb" />
+<img width="300" height="auto" alt="history" src="https://github.com/user-attachments/assets/a90f08e8-265e-4450-80ca-fca356fea9f0" />
+<img width="300" height="auto" alt="stats" src="https://github.com/user-attachments/assets/0897d0cd-d7cd-4d3e-b070-eed0c5072a3a" />
 
 ---
 
