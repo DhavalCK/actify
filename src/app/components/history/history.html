@@ -1,4 +1,4 @@
-<div #scrollContainer class="max-w-md mx-auto h-[calc(100vh-146px)] overflow-y-auto">
+<div #scrollContainer class="max-w-md mx-auto h-[calc(100dvh-146px)] overflow-y-auto">
     <ng-container *ngIf="groupedActions().length">
         <app-action-list *ngFor="let map of groupedActions()" [title]="map[0]" [actions]="map[1]" type="done"
             page="history"></app-action-list>
