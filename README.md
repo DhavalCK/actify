@@ -1,70 +1,213 @@
 # Actify
+**Daily Action Tracker — Build Streaks, Stay Motivated**
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.13.
+![Angular](https://img.shields.io/badge/Angular-20.3-DD0031?style=flat&logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-11.10-FFCA28?style=flat&logo=firebase&logoColor=black)
+![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8?style=flat&logo=pwa&logoColor=white)
 
-## Development server
+---
 
-To start a local development server, run:
+## Overview
 
-```bash
-ng serve
+**Actify** is a mobile-first Progressive Web App designed to help users track daily small actions and build lasting habits. Unlike complex project management tools, Actify focuses on simplicity and consistency—tracking small, daily actions that compound over time.
+
+Built with Angular and Firebase, the app offers a seamless offline-first experience with AI-powered motivational messages to keep users engaged and on track.
+
+---
+
+## Key Features
+
+✅ **Smart Task Sorting** — Automatically separates daily tasks from pending ones  
+🎨 **Visual Urgency** — Color-coded indicators for pending tasks  
+🤖 **AI Motivation** — Personalized encouragement using Google Gemini  
+📱 **Progressive Web App** — Installable on mobile devices with offline support  
+📊 **Streak Tracking** — Visual history of completed actions  
+🌙 **Dark Mode Support** — Optimized for all lighting conditions  
+⚡ **Clean UX** — Minimalist design focused on quick interactions
+
+---
+
+## Screenshots
+
+![Screenshot 1](assets/screens/screenshot-1.png)
+![Screenshot 2](assets/screens/screenshot-2.png)
+![Screenshot 3](assets/screens/screenshot-3.png)
+
+---
+
+## Tech Stack
+
+**Frontend:**
+- Angular 20.3
+- TypeScript 5.9
+- TailwindCSS 3.4
+- RxJS 7.8
+
+**Backend & Services:**
+- Firebase 11.10 (Firestore, Authentication)
+- Firebase Admin SDK 13.6
+- Google Gemini AI 0.24
+
+**PWA & Tooling:**
+- Angular Service Worker
+- Netlify (Hosting & Functions)
+- Jasmine & Karma (Testing)
+
+---
+
+## How It Works
+
+Actify distinguishes between **"Today's"** tasks and **"Pending"** items, using color-coded urgency to help users prioritize effectively:
+
+1. **Add Actions** — Users create small, actionable tasks
+2. **Smart Categorization** — Tasks are automatically sorted into "Today" or "Pending"
+3. **Visual Feedback** — Pending tasks display urgency indicators based on how long they've been waiting
+4. **AI Motivation** — Google Gemini generates personalized motivational messages
+5. **Track Progress** — The "History" feature visualizes completed actions and streaks
+6. **Offline Support** — PWA capabilities ensure the app works without internet
+
+---
+
+## Installation / Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher recommended)
+- npm or yarn
+- Firebase account
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/actify.git
+   cd actify
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**  
+   Create a `.env` file in the root directory (see Environment Variables section below)
+
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
+
+5. **Open the app**  
+   Navigate to `http://localhost:8888` (Netlify Dev) or the port shown in your terminal
+
+---
+
+## Environment Variables
+
+The following environment variables are required for the application to function:
+
+```env
+# Firebase Configuration
+FIREBASE_API_KEY=your_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+> **Note:** Never commit your `.env` file to version control. Add it to `.gitignore`.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Usage Guide
 
-```bash
-ng generate component component-name
-```
+### Adding a New Action
+1. Navigate to the "Daily" tab
+2. Click the "+" button
+3. Enter your action title
+4. Press Enter or click "Add"
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Completing an Action
+- Click the checkbox next to any action to mark it as done
+- Completed actions move to the "History" tab
 
-```bash
-ng generate --help
-```
+### Viewing History
+- Navigate to the "History" tab to see all completed actions
+- Swipe left/right or use arrow buttons to navigate between dates
 
-## Building
+### Checking Stats
+- Navigate to the "Stats" tab to view:
+  - Daily completion rates
+  - Streak information
+  - Performance trends
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## Available Scripts
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start development server with Netlify Dev |
+| `npm run build` | Build production bundle |
+| `npm run watch` | Build in watch mode |
+| `npm test` | Run unit tests with Karma |
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Roadmap / Future Improvements
 
-```bash
-ng test
-```
+The following features are **planned** for future releases:
 
-## Running end-to-end tests
+- 🔔 **Push Notifications** — Reminders for pending tasks
+- 📈 **Advanced Analytics** — Weekly/monthly performance reports
+- 🏆 **Achievements System** — Gamification with badges and rewards
+- 👥 **Social Features** — Share streaks with friends
+- 🔄 **Recurring Tasks** — Support for daily/weekly habits
+- 🌍 **Multi-language Support** — Internationalization
+- 📤 **Data Export** — Export history to CSV/JSON
 
-For end-to-end (e2e) testing, run:
+---
 
-```bash
-ng e2e
-```
+## What I Learned
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Building Actify provided valuable experience with:
 
-## Additional Resources
+- **Angular Standalone Components** — Leveraging Angular's modern component architecture
+- **Firebase Integration** — Real-time data syncing and authentication
+- **PWA Development** — Service workers, offline-first strategies, and installability
+- **AI Integration** — Working with Google Gemini API for dynamic content generation
+- **State Management** — Using RxJS for reactive data flows
+- **Mobile-First Design** — Creating responsive, touch-friendly interfaces with TailwindCSS
+- **Performance Optimization** — Achieving high Lighthouse scores through lazy loading and caching
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
 
+## Contributing
 
-✅ Split Today vs Pending tasks (UI only)
+Contributions are welcome! If you'd like to contribute:
 
-✅ Add Pending color urgency
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-✅ Bottom navigation (Today / History)
+---
 
-✅ History screen (completed only)
+## License
 
-✅ Motivation cooldown logic (1-hour rule)
+MIT (recommended)
+
+---
+
+## Contact
+
+**Dhaval** — [GitHub](https://github.com/DhavalCK)
+
+Project Link: [https://github.com/DhavalCK/actify](https://github.com/DhavalCK/actify)  
+Live Demo: [https://actify-daily.netlify.app/](https://actify-daily.netlify.app/)
