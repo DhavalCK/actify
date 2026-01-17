@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActionsService } from '../../services/actions.service';
+import { StatsService } from '../../services/stats.service';
 import { DashboardService } from '../../services/dashboard.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { DashboardService } from '../../services/dashboard.service';
     templateUrl: './stats.html',
 })
 export class Stats {
-    actionsService = inject(ActionsService);
+    statsService = inject(StatsService);
     dashboardService = inject(DashboardService);
 
     // Consistency
@@ -19,62 +19,7 @@ export class Stats {
 
     // Consolidated Stats Computation
     stats = computed(() => {
-        const actions = this.actionsService.actions();
-        const now = Date.now();
-
-        // Initial State
-        const actionsByDate = new Map<string, { total: number; completed: number }>();
-        let procTotalDuration = 0;
-        let procSameDayCount = 0;
-        let procCount = 0;
-        let pendingTotalAge = 0;
-        let pendingMaxAge = 0;
-        let pendingCount = 0;
-
-        // Single Pass Loop
-        actions.forEach(action => {
-            // 1. Completion Stats Data
-            const date = new Date(action.createdAt).toLocaleDateString();
-            const entry = actionsByDate.get(date) || { total: 0, completed: 0 };
-            entry.total++;
-            if (action.done) entry.completed++;
-            actionsByDate.set(date, entry);
-
-            // 2. Procrastination Stats Data
-            if (action.done && action.doneAt) {
-                procCount++;
-                procTotalDuration += (action.doneAt - action.createdAt);
-                const created = new Date(action.createdAt);
-                const done = new Date(action.doneAt);
-                if (created.toDateString() === done.toDateString()) {
-                    procSameDayCount++;
-                }
-            }
-
-            // 3. Pending Stats Data
-            if (!action.done) {
-                pendingCount++;
-                const age = now - action.createdAt;
-                pendingTotalAge += age;
-                if (age > pendingMaxAge) pendingMaxAge = age;
-            }
-        });
-
-        // Calculate Completion
-        let totalPercentage = 0;
-        if (actionsByDate.size > 0) {
-            actionsByDate.forEach(entry => {
-                totalPercentage += (entry.completed / entry.total) * 100;
-            });
-        }
-        const completionAverage = actionsByDate.size > 0 ? Math.round(totalPercentage / actionsByDate.size) : 0;
-
-        // Calculate Procrastination
-        const procAvgMs = procCount > 0 ? procTotalDuration / procCount : 0;
-        const procSameDay = procCount > 0 ? Math.round((procSameDayCount / procCount) * 100) : 0;
-
-        // Calculate Pending
-        const pendingAvgAgeMs = pendingCount > 0 ? pendingTotalAge / pendingCount : 0;
+        const s = this.statsService.stats();
 
         return {
             consistency: {
@@ -82,16 +27,16 @@ export class Stats {
                 bestStreak: this.dashboardService.bestStreak()
             },
             completion: {
-                average: completionAverage
+                average: Math.round(s.completionAverage)
             },
             procrastination: {
-                averageTime: procCount > 0 ? this.formatDuration(procAvgMs) : 'N/A',
-                sameDay: procSameDay,
-                later: 100 - procSameDay
+                averageTime: s.procAvgMs > 0 ? this.formatDuration(s.procAvgMs) : 'N/A',
+                sameDay: Math.round(s.procSameDayPercent),
+                later: 100 - Math.round(s.procSameDayPercent)
             },
             pending: {
-                averageAge: pendingCount > 0 ? this.formatDuration(pendingAvgAgeMs) : '0 days',
-                longest: pendingCount > 0 ? this.formatDuration(pendingMaxAge) : '0 days'
+                averageAge: s.pendingAvgAgeMs > 0 ? this.formatDuration(s.pendingAvgAgeMs) : '0 days',
+                longest: s.pendingMaxAgeMs > 0 ? this.formatDuration(s.pendingMaxAgeMs) : '0 days'
             }
         };
     });

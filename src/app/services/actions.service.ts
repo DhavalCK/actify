@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
 import { StreakService } from './streak.service';
 import { MotivationService } from './motivation.service';
+import { StatsService } from './stats.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class ActionsService {
 
   // TEMP: when auth added we'll replace this with current user's uid
   private readonly collectionPath = `actions`; // later users/${uid}/actions
-  private readonly PAGE_SIZE = 20;
+  private readonly PAGE_SIZE = 5;
 
   actions = signal<Action[]>([]);
   isLoading = signal<boolean>(false);
@@ -24,6 +25,7 @@ export class ActionsService {
   private performance: PerformanceService;
   private streakServ: StreakService;
   private motivationService: MotivationService;
+  private statsService: StatsService;
 
   constructor() {
     this.db = inject(Firestore); // inside constructor is safer
@@ -31,6 +33,7 @@ export class ActionsService {
     this.performance = inject(PerformanceService);
     this.streakServ = inject(StreakService);
     this.motivationService = inject(MotivationService);
+    this.statsService = inject(StatsService);
 
     effect(() => {
       if (!this.auth.userId) {
@@ -184,7 +187,16 @@ export class ActionsService {
       title: title.trim(),
       done: false,
       createdAt: new Date()
-    });
+    });  // Update Stats
+    const newAction: Action = {
+      id: docRef.id,
+      title: title.trim(),
+      done: false,
+      createdAt: Date.now(), // Approximation for stats
+      doneAt: null
+    };
+    this.statsService.onActionAdded(newAction);
+
     await this.calculatePerformance();
     return docRef.id;
   }
@@ -194,7 +206,25 @@ export class ActionsService {
     if (!this.auth.userId) return;
 
     const docRef = doc(this.db, this.authCollectionPath, id);
-    await deleteDoc(docRef);
+
+    // Fetch before delete for stats
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const actionToDelete = {
+        id: docSnap.id,
+        ...data,
+        createdAt: data['createdAt']?.toMillis ? data['createdAt'].toMillis() : data['createdAt'],
+        doneAt: data['doneAt']?.toMillis ? data['doneAt'].toMillis() : data['doneAt']
+      } as Action;
+
+      await deleteDoc(docRef);
+      this.statsService.onActionDeleted(actionToDelete);
+    } else {
+      // Just delete if not found (shouldn't happen)
+      await deleteDoc(docRef);
+    }
+
     await this.calculatePerformance();
     return;
   }
@@ -214,6 +244,16 @@ export class ActionsService {
     if (newDoneState) {
       this.motivationService.regenerateMotivation();
     }
+
+    // Update Stats
+    // We need to pass the updated state to stats service
+    const updatedAction = {
+      ...action,
+      done: newDoneState,
+      doneAt: newDoneState ? Date.now() : undefined
+    };
+    this.statsService.onActionToggled(updatedAction, newDoneState);
+
     return;
   }
 
