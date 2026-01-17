@@ -1,0 +1,74 @@
+{
+    "low_ratio_low_streak": [
+        "Every small step counts, keep going.",
+        "Focus on just one task right now.",
+        "You can turn this day around.",
+        "Start small, finish strong.",
+        "Don't give up, just show up.",
+        "Progress is progress, no matter how small.",
+        "One checkmark is better than none.",
+        "Breathe. You got this.",
+        "It's not too late to start.",
+        "Just do one thing today."
+    ],
+    "low_ratio_high_streak": [
+        "Protect your streak, do one task!",
+        "Don't let the chain break today.",
+        "You've been consistent, keep it up.",
+        "A small effort saves the streak.",
+        "Your streak proves you can do this.",
+        "Stay in the game, just one more.",
+        "Consistency is key, keep pushing.",
+        "Don't stop now, you're on a roll.",
+        "Your momentum is your strength.",
+        "Keep the streak alive!"
+    ],
+    "medium_ratio_low_streak": [
+        "Good start! Keep the momentum.",
+        "You're halfway there, keep pushing.",
+        "Solid effort so far today.",
+        "Building habits takes time, good job.",
+        "You're doing great, finish strong.",
+        "Keep chipping away at it.",
+        "You're making real progress.",
+        "Stay focused, you're doing well.",
+        "A little more effort goes a long way.",
+        "You're on the right track."
+    ],
+    "medium_ratio_high_streak": [
+        "Great consistency! Keep it going.",
+        "Another solid day for your streak.",
+        "You're building an unstoppable habit.",
+        "Your discipline is paying off.",
+        "Strong work! Keep the streak alive.",
+        "You're crushing it, day by day.",
+        "Nothing stops you, keep moving.",
+        "Your streak is looking impressive.",
+        "Steady progress wins the race.",
+        "You're a consistency machine."
+    ],
+    "high_ratio": [
+        "Amazing work today!",
+        "You are absolutely crushing it.",
+        "So close to a perfect day!",
+        "Incredible focus and effort.",
+        "You're on fire today!",
+        "Outstanding performance.",
+        "You're unstoppable right now.",
+        "What a productive day!",
+        "You're killing it!",
+        "Keep up this amazing energy."
+    ],
+    "perfect_day": [
+        "Perfection! You did it all.",
+        "100% complete. You're a legend.",
+        "Flawless victory today.",
+        "You conquered everything.",
+        "Nothing left standing. Great job!",
+        "Complete mastery of your day.",
+        "You finished it all! Relax now.",
+        "A perfect score! Well earned.",
+        "Total domination of your tasks.",
+        "You are the master of productivity."
+    ]
+}

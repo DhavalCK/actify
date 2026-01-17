@@ -49,4 +49,26 @@ export class MotivationService {
 
         this.motivationText.set((freshSnap.data() as any)?.text ?? '');
     }
+
+    async regenerateMotivation() {
+        if (!this.auth.userId) return;
+
+        const dateKey = this.performanceService.getTodayKey();
+        const docRef = doc(this.db, 'users', this.auth.userId, 'motivation', dateKey);
+
+        // always call function (force new motivation)
+        await fetch("/.netlify/functions/generate-motivation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                uid: this.auth.userId,
+                dateKey,
+                force: true // optional flag (explained below)
+            })
+        });
+
+        // fetch latest motivation from firestore and update UI
+        const freshSnap = await getDoc(docRef);
+        this.motivationText.set((freshSnap.data() as any)?.text ?? '');
+    }
 }
