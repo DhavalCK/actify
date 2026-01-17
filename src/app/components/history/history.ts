@@ -1,5 +1,5 @@
 import { Component, computed, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { ActionsService } from '../../services/actions.service';
+import { HistoryService } from '../../services/history.service';
 import { ActionList } from "../actions-container/action-list/action-list";
 import { CommonModule, DatePipe } from '@angular/common';
 import { Action } from '../../models/action.model';
@@ -14,33 +14,15 @@ import { Action } from '../../models/action.model';
 export class History implements AfterViewInit {
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
-  actionService = inject(ActionsService);
+  historyService = inject(HistoryService);
   datePipe = inject(DatePipe);
 
-  // Optimization: Intermediate signal to filter completed actions
-  // Uses custom equality check to prevent downstream recalculations when 
-  // pending actions change or when Firestore emits new object references for unchanged data
-  completedActions = computed(() => {
-    return this.actionService.actions().filter(a => a.done);
-  }, {
-    equal: (a: Action[], b: Action[]) => {
-      if (a === b) return true;
-      if (a.length !== b.length) return false;
-      // Check if content is effectively the same (ignoring object identity)
-      return a.every((action, index) =>
-        action.id === b[index].id &&
-        action.doneAt === b[index].doneAt &&
-        action.createdAt === b[index].createdAt
-      );
-    }
-  });
-
   groupedActions = computed(() => {
-    const completedActions = this.completedActions();
-
+    const actions = this.historyService.historyActions();
     const actionsMap = new Map<string, Action[]>();
 
-    completedActions.forEach((action) => {
+    actions.forEach((action) => {
+      // Group by doneAt (fallback to createdAt if missing, though query ensures done=true)
       const timestamp = action.doneAt || action.createdAt;
       const date = new Date(timestamp).toLocaleDateString();
       const list = actionsMap.get(date) || [];
@@ -53,7 +35,7 @@ export class History implements AfterViewInit {
       return new Date(b[0]).getTime() - new Date(a[0]).getTime();
     });
 
-    // Sort actions within groups by time descending
+    // Sort actions within groups by doneAt descending
     sortedGroups.forEach(group => {
       group[1].sort((a, b) => {
         const timeA = a.doneAt || a.createdAt;
@@ -65,8 +47,12 @@ export class History implements AfterViewInit {
     return sortedGroups;
   });
 
+  ngOnInit() {
+    // Reload history when entering the view to ensure freshness
+    this.historyService.loadInitialHistory();
+  }
+
   ngAfterViewInit() {
-    // Add scroll listener for infinite scroll
     this.scrollContainer?.nativeElement?.addEventListener('scroll', () => {
       this.onScroll();
     });
@@ -80,8 +66,8 @@ export class History implements AfterViewInit {
     const scrollHeight = element.scrollHeight;
 
     // Trigger load more when user is 200px from bottom
-    if (scrollHeight - scrollPosition < 200 && this.actionService.hasMore() && !this.actionService.isLoading()) {
-      this.actionService.loadMoreActions();
+    if (scrollHeight - scrollPosition < 200 && this.historyService.hasMore() && !this.historyService.isLoading()) {
+      this.historyService.loadMoreHistoryActions();
     }
   }
 
