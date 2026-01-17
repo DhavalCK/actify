@@ -4,6 +4,7 @@ import { addDoc, collection, collectionData, deleteDoc, doc, getDoc, Firestore, 
 import { AuthService } from './auth.service';
 import { PerformanceService } from './performance.service';
 import { StreakService } from './streak.service';
+import { MotivationService } from './motivation.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,12 +23,14 @@ export class ActionsService {
   private auth: AuthService;
   private performance: PerformanceService;
   private streakServ: StreakService;
+  private motivationService: MotivationService;
 
   constructor() {
     this.db = inject(Firestore); // inside constructor is safer
     this.auth = inject(AuthService); // inside constructor is safer
     this.performance = inject(PerformanceService);
     this.streakServ = inject(StreakService);
+    this.motivationService = inject(MotivationService);
 
     effect(() => {
       if (!this.auth.userId) {
@@ -201,6 +204,9 @@ export class ActionsService {
       doneAt: newDoneState ? Date.now() : null
     });
     await this.calculatePerformance();
+    if (newDoneState) {
+      this.motivationService.regenerateMotivation();
+    }
     return;
   }
 

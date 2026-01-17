@@ -1,12 +1,9 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const admin = require("./_firebase");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const messages = require("./motivation-messages.json");
 
 exports.handler = async (event, context) => {
     const apiMethod = event.httpMethod;
     if (apiMethod !== 'POST') {
-        // “Method not allowed” (standard API error)
         return {
             statusCode: 405,
             body: JSON.stringify({
@@ -29,50 +26,61 @@ exports.handler = async (event, context) => {
 
     // Get Firestore admin access
     const db = admin.firestore();
-    // 📁 users
-    // └── uid
-    // └── motivation
-    // └── dateKey
     const ref = db.doc(`users/${uid}/motivation/${dateKey}`);
+
+    // 1. Check if motivation already exists for this date (unless forced)
+    const { force } = body;
     const snap = await ref.get();
 
-    if (snap.exists) {
+    if (!force && snap.exists) {
         return {
             statusCode: 200,
             body: JSON.stringify(snap.data())
         };
     }
 
-    // Read Inputs 
+    // 2. Read Inputs for new generation
     const perfSnap = await db.doc(`users/${uid}/performance/${dateKey}`).get();
     const streakSnap = await db.doc(`users/${uid}/streak/info`).get();
 
-    const ratio = perfSnap?.exists ? perfSnap.data().ratio ?? 0 : 0;
-    const streak = streakSnap?.exists ? streakSnap?.data().current ?? 0 : 0;
+    const ratio = perfSnap?.exists ? (perfSnap.data().ratio ?? 0) : 0;
+    const streak = streakSnap?.exists ? (streakSnap.data().current ?? 0) : 0;
 
-    // Gemini prompt (short + controlled)
-    const prompt = `
-User completed ${ratio}% of today's actions.
-Current streak: ${streak} days.
+    // 3. Select Bucket based on Rules
+    let bucketKey = 'low_ratio_low_streak'; // default fallback
 
-Write ONE short, encourging sentence.
-No emojis. No quote. Max 15 words.
-`;
+    if (ratio === 100) {
+        bucketKey = 'perfect_day';
+    } else if (ratio >= 70) {
+        bucketKey = 'high_ratio';
+    } else if (ratio >= 30) {
+        // Medium Ratio (30-69)
+        if (streak >= 3) {
+            bucketKey = 'medium_ratio_high_streak';
+        } else {
+            bucketKey = 'medium_ratio_low_streak';
+        }
+    } else {
+        // Low Ratio (< 30)
+        if (streak >= 3) {
+            bucketKey = 'low_ratio_high_streak';
+        } else {
+            bucketKey = 'low_ratio_low_streak';
+        }
+    }
 
-    console.log('prompt', prompt);
-    // Generate Motivation by Gemini API
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    console.log('text', text);
+    // 4. Select Random Message from Bucket
+    const bucketMessages = messages[bucketKey] || messages['low_ratio_low_streak'];
+    const randomIndex = Math.floor(Math.random() * bucketMessages.length);
+    const text = bucketMessages[randomIndex];
 
     const payload = {
         text,
         date: dateKey,
-        // Save server time (not fake client time)
         generatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
+    // 5. Save to Firestore
     await ref.set(payload);
 
     return {
